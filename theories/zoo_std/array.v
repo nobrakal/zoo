@@ -604,7 +604,11 @@ Section zoo_G.
       array_model t dq (rotation (sz - i `mod` sz) vs).
     Proof.
       intros Hsz Hvs.
-    Admitted.
+      rewrite /array_cslice /array_model.
+      setoid_rewrite chunk_cslice_to_model_full; [| done..].
+      rewrite length_rotation Hvs.
+      iSplit; iIntros "(%l & -> & #Hhdr & Hcs)"; iExists l; iFrame "∗ #"; done.
+    Qed.
     Lemma array_cslice_to_slice_cell t sz i dq v :
       array_cslice t sz i dq [v] ⊣⊢
         array_inv t sz ∗
