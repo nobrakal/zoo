@@ -244,11 +244,11 @@ Section zoo_G.
         iDestruct ("IH" with "[] Hmodel1 Hmodel2") as "(-> & Hmodel)"; first iSteps. iSplit; first iSteps.
         iApply (chunk_model_cons_1 with "H↦ Hmodel").
     Qed.
-    Lemma chunk_model_valid_2 l dq1 vs1 dq2 vs2 :
+    Lemma chunk_model_valid_2 l i dq1 vs1 dq2 vs2 :
       0 < length vs1 →
       length vs1 = length vs2 →
-      chunk_model l 0 dq1 vs1 -∗
-      chunk_model l 0 dq2 vs2 -∗
+      chunk_model l i dq1 vs1 -∗
+      chunk_model l i dq2 vs2 -∗
         ⌜✓ (dq1 ⋅ dq2)⌝ ∗
         ⌜vs1 = vs2⌝.
     Proof.
@@ -257,41 +257,41 @@ Section zoo_G.
       iDestruct (chunk_model_valid with "Hmodel") as "$"; first done.
       iSteps.
     Qed.
-    Lemma chunk_model_agree l dq1 vs1 dq2 vs2 :
+    Lemma chunk_model_agree l i dq1 vs1 dq2 vs2 :
       length vs1 = length vs2 →
-      chunk_model l 0 dq1 vs1 -∗
-      chunk_model l 0 dq2 vs2 -∗
+      chunk_model l i dq1 vs1 -∗
+      chunk_model l i dq2 vs2 -∗
       ⌜vs1 = vs2⌝.
     Proof.
       iIntros "% Hmodel1 Hmodel2".
       iDestruct (chunk_model_combine with "Hmodel1 Hmodel2") as "($ & _)"; first done.
     Qed.
-    Lemma chunk_model_dfrac_ne l1 dq1 vs1 l2 dq2 vs2 :
+    Lemma chunk_model_dfrac_ne l1 i dq1 vs1 l2 dq2 vs2 :
       0 < length vs1 →
       length vs1 = length vs2 →
       ¬ ✓ (dq1 ⋅ dq2) →
-      chunk_model l1 0 dq1 vs1 -∗
-      chunk_model l2 0 dq2 vs2 -∗
+      chunk_model l1 i dq1 vs1 -∗
+      chunk_model l2 i dq2 vs2 -∗
       ⌜l1 ≠ l2⌝.
     Proof.
       iIntros "% % % Hmodel1 Hmodel2" (->).
       iDestruct (chunk_model_valid_2 with "Hmodel1 Hmodel2") as %?; naive_solver.
     Qed.
-    Lemma chunk_model_ne l1 vs1 l2 dq2 vs2 :
+    Lemma chunk_model_ne l1 i vs1 l2 dq2 vs2 :
       0 < length vs1 →
       length vs1 = length vs2 →
-      chunk_model l1 0 (DfracOwn 1) vs1 -∗
-      chunk_model l2 0 dq2 vs2 -∗
+      chunk_model l1 i (DfracOwn 1) vs1 -∗
+      chunk_model l2 i dq2 vs2 -∗
       ⌜l1 ≠ l2⌝.
     Proof.
       intros.
       iApply chunk_model_dfrac_ne; [done.. | intros []%(exclusive_l _)].
     Qed.
-    Lemma chunk_model_exclusive l vs1 dq2 vs2 :
+    Lemma chunk_model_exclusive l i vs1 dq2 vs2 :
       0 < length vs1 →
       length vs1 = length vs2 →
-      chunk_model l 0 (DfracOwn 1) vs1 -∗
-      chunk_model l 0 dq2 vs2 -∗
+      chunk_model l i (DfracOwn 1) vs1 -∗
+      chunk_model l i dq2 vs2 -∗
       False.
     Proof.
       iIntros "% % Hmodel1 Hmodel2".
@@ -314,28 +314,28 @@ Section zoo_G.
       ⌜length vs = n⌝ ∗
       chunk_model l i dq vs.
 
-    #[global] Instance chunk_span_timeless l dq n :
-      Timeless (chunk_span l 0 dq n).
+    #[global] Instance chunk_span_timeless l i dq n :
+      Timeless (chunk_span l i dq n).
     Proof.
       apply _.
     Qed.
 
-    #[global] Instance chunk_span_persistent l n :
-      Persistent (chunk_span l 0 DfracDiscarded n).
+    #[global] Instance chunk_span_persistent l i n :
+      Persistent (chunk_span l i DfracDiscarded n).
     Proof.
       apply _.
     Qed.
 
-    #[global] Instance chunk_span_fractional l n :
-      Fractional (λ q, chunk_span l 0 (DfracOwn q) n).
+    #[global] Instance chunk_span_fractional l i n :
+      Fractional (λ q, chunk_span l i (DfracOwn q) n).
     Proof.
       intros q1 q2. rewrite /chunk_span. setoid_rewrite chunk_model_fractional. iSplit; first iSteps.
       iIntros "((%vs & % & Hmodel1) & (%_vs & % & Hmodel2))".
       iDestruct (chunk_model_agree with "Hmodel1 Hmodel2") as %<-; first naive_solver.
       iSteps.
     Qed.
-    #[global] Instance chunk_span_as_fractional l q n :
-      AsFractional (chunk_span l 0 (DfracOwn q) n) (λ q, chunk_span l 0 (DfracOwn q) n) q.
+    #[global] Instance chunk_span_as_fractional l i q n :
+      AsFractional (chunk_span l i (DfracOwn q) n) (λ q, chunk_span l i (DfracOwn q) n) q.
     Proof.
       split; [done | apply _].
     Qed.
@@ -510,69 +510,69 @@ Section zoo_G.
       iSteps.
     Qed.
 
-    Lemma chunk_span_valid l dq n :
+    Lemma chunk_span_valid l i dq n :
       0 < n →
-      chunk_span l 0 dq n ⊢
+      chunk_span l i dq n ⊢
       ⌜✓ dq⌝.
     Proof.
       iIntros "% (%vs & % & Hmodel)".
       iApply (chunk_model_valid with "Hmodel"); first naive_solver.
     Qed.
-    Lemma chunk_span_combine l dq1 n1 dq2 n2 :
+    Lemma chunk_span_combine l i dq1 n1 dq2 n2 :
       n1 = n2 →
-      chunk_span l 0 dq1 n1 -∗
-      chunk_span l 0 dq2 n2 -∗
-      chunk_span l 0 (dq1 ⋅ dq2) n1.
+      chunk_span l i dq1 n1 -∗
+      chunk_span l i dq2 n2 -∗
+      chunk_span l i (dq1 ⋅ dq2) n1.
     Proof.
       iIntros (<-) "(%vs1 & % & Hmodel1) (%vs2 & % & Hmodel2)".
       iDestruct (chunk_model_combine with "Hmodel1 Hmodel2") as "(<- & Hmodel)"; first naive_solver.
       iSteps.
     Qed.
-    Lemma chunk_span_valid_2 l dq1 n1 dq2 n2 :
+    Lemma chunk_span_valid_2 l i dq1 n1 dq2 n2 :
       n1 = n2 →
       0 < n1 →
-      chunk_span l 0 dq1 n1 -∗
-      chunk_span l 0 dq2 n2 -∗
+      chunk_span l i dq1 n1 -∗
+      chunk_span l i dq2 n2 -∗
       ⌜✓ (dq1 ⋅ dq2)⌝.
     Proof.
       iIntros "% % Hspan1 Hspan2".
       iDestruct (chunk_span_combine with "Hspan1 Hspan2") as "Hspan"; first done.
       iDestruct (chunk_span_valid with "Hspan") as "$"; first done.
     Qed.
-    Lemma chunk_span_dfrac_ne l1 dq1 n1 l2 dq2 n2 :
+    Lemma chunk_span_dfrac_ne l1 i dq1 n1 l2 dq2 n2 :
       n1 = n2 →
       0 < n1 →
       ¬ ✓ (dq1 ⋅ dq2) →
-      chunk_span l1 0 dq1 n1 -∗
-      chunk_span l2 0 dq2 n2 -∗
+      chunk_span l1 i dq1 n1 -∗
+      chunk_span l2 i dq2 n2 -∗
       ⌜l1 ≠ l2⌝.
     Proof.
       iIntros "% % % Hspan1 Hspan2" (->).
       iDestruct (chunk_span_valid_2 with "Hspan1 Hspan2") as %?; done.
     Qed.
-    Lemma chunk_span_ne l1 n1 l2 dq2 n2 :
+    Lemma chunk_span_ne l1 i n1 l2 dq2 n2 :
       n1 = n2 →
       0 < n1 →
-      chunk_span l1 0 (DfracOwn 1) n1 -∗
-      chunk_span l2 0 dq2 n2 -∗
+      chunk_span l1 i (DfracOwn 1) n1 -∗
+      chunk_span l2 i dq2 n2 -∗
       ⌜l1 ≠ l2⌝.
     Proof.
       intros.
       iApply chunk_span_dfrac_ne; [done.. | intros []%(exclusive_l _)].
     Qed.
-    Lemma chunk_span_exclusive l n1 dq2 n2 :
+    Lemma chunk_span_exclusive l i n1 dq2 n2 :
       n1 = n2 →
       0 < n1 →
-      chunk_span l 0 (DfracOwn 1) n1 -∗
-      chunk_span l 0 dq2 n2 -∗
+      chunk_span l i (DfracOwn 1) n1 -∗
+      chunk_span l i dq2 n2 -∗
       False.
     Proof.
       iIntros "% % Hspan1 Hspan2".
       iDestruct (chunk_span_ne with "Hspan1 Hspan2") as %?; done.
     Qed.
-    Lemma chunk_span_persist l dq n :
-      chunk_span l 0 dq n ⊢ |==>
-      chunk_span l 0 DfracDiscarded n.
+    Lemma chunk_span_persist l i dq n :
+      chunk_span l i dq n ⊢ |==>
+      chunk_span l i DfracDiscarded n.
     Proof.
       iIntros "(%vs & % & Hmodel)".
       iMod (chunk_model_persist with "Hmodel") as "Hmodel".
@@ -609,7 +609,7 @@ Section zoo_G.
       split; [done | apply _].
     Qed.
 
-    Lemma chunk_model_to_cslice l dq vs :
+    Lemma chunk_model_to_cslice l i dq vs :
       chunk_model l 0 dq vs ⊢
       chunk_cslice l (length vs) 0 dq vs.
     Proof.
