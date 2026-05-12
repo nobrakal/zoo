@@ -10,8 +10,7 @@ From zoo_std Require Export
 From zoo Require Import
   options.
 
-Implicit Types n : nat.
-Implicit Types i : Z.
+Implicit Types i n : nat.
 Implicit Types l : location.
 Implicit Types v : val.
 Implicit Types vs : list val.
@@ -20,8 +19,8 @@ Section zoo_G.
   Context `{zoo_G : !ZooG Σ}.
 
   Section chunk_model.
-    Definition chunk_model l (i : Z) dq vs : iProp Σ :=
-      [∗ list] k ↦ v ∈ vs, l ↦[i + Z.of_nat k]{dq} v.
+    Definition chunk_model l i dq vs : iProp Σ :=
+      [∗ list] k ↦ v ∈ vs, l ↦[i + k]{dq} v.
 
     #[global] Instance chunk_model_timeless l i dq vs :
       Timeless (chunk_model l i dq vs).
@@ -71,14 +70,14 @@ Section zoo_G.
       rewrite chunk_model_singleton //.
     Qed.
 
-    Lemma chunk_model_app l (i : Z) dq vs1 vs2 :
+    Lemma chunk_model_app l i dq vs1 vs2 :
       chunk_model l i dq vs1 ∗
       chunk_model l (i + length vs1) dq vs2 ⊣⊢
       chunk_model l i dq (vs1 ++ vs2).
     Proof.
       rewrite /chunk_model big_sepL_app. apply bi.sep_proper; first done.
       apply big_sepL_proper. intros ? ? ?.
-      rewrite Nat2Z.inj_add Z.add_assoc //.
+      rewrite !Nat2Z.inj_add Z.add_assoc //.
     Qed.
     Lemma chunk_model_app_1 dq l i vs1 vs2 :
       chunk_model l i dq vs1 -∗
@@ -96,7 +95,7 @@ Section zoo_G.
       intros ->. rewrite chunk_model_app //.
     Qed.
 
-    Lemma chunk_model_app3 l (i : Z) dq vs1 vs2 vs3 :
+    Lemma chunk_model_app3 l i dq vs1 vs2 vs3 :
       chunk_model l i dq vs1 ∗
       chunk_model l (i + length vs1) dq vs2 ∗
       chunk_model l (i + length vs1 + length vs2) dq vs3 ⊣⊢
@@ -122,7 +121,7 @@ Section zoo_G.
       intros ->. rewrite chunk_model_app3 //.
     Qed.
 
-    Lemma chunk_model_atomize l (i : Z) dq vs :
+    Lemma chunk_model_atomize l i dq vs :
       chunk_model l i dq vs ⊣⊢
       [∗ list] k ↦ v ∈ vs, chunk_model l (i + k) dq [v].
     Proof.
@@ -131,7 +130,7 @@ Section zoo_G.
         iApply chunk_model_nil.
       - change (v :: vs) with ([v] ++ vs).
         rewrite -chunk_model_app big_sepL_app big_sepL_singleton /=.
-        rewrite Z.add_0_r IH.
+        rewrite Nat.add_0_r IH.
         apply bi.sep_proper; first done.
         apply big_sepL_proper. intros k x _.
         f_equiv. lia.
@@ -143,9 +142,9 @@ Section zoo_G.
       chunk_model l i dq (v :: vs).
     Proof.
       rewrite /chunk_model /=. f_equiv.
-      { rewrite Z.add_0_r //. }
-      apply big_sepL_proper. intros ? ? ?.
-      rewrite Nat2Z.inj_succ -Z.add_1_l Z.add_assoc //.
+      { assert (Z.of_nat i + Z.of_nat 0 = Z.of_nat i)%Z as -> by lia. done. }
+      apply big_sepL_proper. intros k ? ?.
+      assert (Z.of_nat (i + 1) + Z.of_nat k = Z.of_nat i + Z.of_nat (S k))%Z as -> by lia. done.
     Qed.
     Lemma chunk_model_cons_1 l i dq v vs :
       l ↦[i]{dq} v -∗
@@ -228,7 +227,7 @@ Section zoo_G.
       iIntros "(H↦ & _)".
       iApply (pointsto_valid with "H↦").
     Qed.
-    Lemma chunk_model_combine l (i : Z) dq1 vs1 dq2 vs2 :
+    Lemma chunk_model_combine l i dq1 vs1 dq2 vs2 :
       length vs1 = length vs2 →
       chunk_model l i dq1 vs1 -∗
       chunk_model l i dq2 vs2 -∗
@@ -309,7 +308,7 @@ Section zoo_G.
   End chunk_model.
 
   Section chunk_span.
-    Definition chunk_span l (i : Z) dq n : iProp Σ :=
+    Definition chunk_span l i dq n : iProp Σ :=
       ∃ vs,
       ⌜length vs = n⌝ ∗
       chunk_model l i dq vs.
@@ -376,10 +375,10 @@ Section zoo_G.
       iSplit.
       - iIntros "(%v & H↦ & (%vs & % & Hmodel))".
         iExists (v :: vs). iSplit; first iSteps.
-        iApply (chunk_model_cons_1 with "H↦ Hmodel").
+        iApply (chunk_model_cons_1 _ 0 with "H↦ Hmodel").
       - iIntros "(%vs & % & Hmodel)".
         destruct vs as [| v vs]; first done.
-        iDestruct (chunk_model_cons_2 with "Hmodel") as "(H↦ & Hmodel)".
+        iDestruct (chunk_model_cons_2 _ 0 with "Hmodel") as "(H↦ & Hmodel)".
         iExists v. iFrameSteps.
     Qed.
     Lemma chunk_span_cons_1 l dq v n :
@@ -406,7 +405,7 @@ Section zoo_G.
       iPoseProof H as "H". iSteps.
     Qed.
 
-    Lemma chunk_span_app l (i : Z) dq n1 n2 :
+    Lemma chunk_span_app l i dq n1 n2 :
       chunk_span l i dq n1 ∗
       chunk_span l (i + n1) dq n2 ⊣⊢
       chunk_span l i dq (n1 + n2).
@@ -424,7 +423,7 @@ Section zoo_G.
         + iExists (drop n1 vs). iFrame. iSplit; first (iPureIntro; rewrite length_drop; lia).
           rewrite Hlen //.
     Qed.
-    Lemma chunk_span_app_1 dq l (i : Z) n1 n2 :
+    Lemma chunk_span_app_1 dq l i n1 n2 :
       chunk_span l i dq n1 -∗
       chunk_span l (i + n1) dq n2 -∗
       chunk_span l i dq (n1 + n2).
@@ -440,7 +439,7 @@ Section zoo_G.
       intros ->. rewrite chunk_span_app //.
     Qed.
 
-    Lemma chunk_span_app3 l (i : Z) dq n1 n2 n3 :
+    Lemma chunk_span_app3 l i dq n1 n2 n3 :
       chunk_span l i dq n1 ∗
       chunk_span l (i + n1) dq n2 ∗
       chunk_span l (i + n1 + n2) dq n3 ⊣⊢
@@ -449,7 +448,7 @@ Section zoo_G.
       rewrite (chunk_span_app _ (i + n1) _ n2 n3).
       rewrite chunk_span_app Nat.add_assoc //.
     Qed.
-    Lemma chunk_span_app3_1 dq l (i : Z) n1 n2 n3 :
+    Lemma chunk_span_app3_1 dq l i n1 n2 n3 :
       chunk_span l i dq n1 -∗
       chunk_span l (i + n1) dq n2 -∗
       chunk_span l (i + n1 + n2) dq n3 -∗
@@ -583,7 +582,7 @@ Section zoo_G.
   Section chunk_cslice.
     Implicit Types sz : nat.
 
-    Definition chunk_cslice l sz (i : Z) dq vs : iProp Σ :=
+    Definition chunk_cslice l sz i dq vs : iProp Σ :=
       [∗ list] k ↦ v ∈ vs, l ↦[(i + k) `mod` sz]{dq} v.
 
     #[global] Instance chunk_cslice_timeless l sz i dq vs :
@@ -622,7 +621,10 @@ Section zoo_G.
       chunk_cslice l sz i dq [v].
     Proof.
       rewrite /chunk_model /chunk_cslice.
-      rewrite !big_sepL_singleton /= Z.add_0_r right_id //.
+      rewrite !big_sepL_singleton /=.
+      assert (Z.of_nat (i `mod` sz) + Z.of_nat 0 = (Z.of_nat i + Z.of_nat 0) `mod` Z.of_nat sz)%Z as ->.
+      { rewrite !Z.add_0_r Nat2Z.inj_mod //. }
+      done.
     Qed.
 
     Lemma chunk_cslice_nil l sz i dq :
@@ -658,10 +660,10 @@ Section zoo_G.
       rewrite /chunk_cslice big_sepL_app.
       apply bi.sep_proper; first done.
       apply big_sepL_proper. intros k v _.
-      rewrite Nat2Z.inj_add Z.add_assoc //.
+      rewrite !Nat2Z.inj_add Z.add_assoc //.
     Qed.
-    Lemma chunk_cslice_app_1 l sz dq (i1 : Z) vs1 (i2 : Z) vs2 :
-      i2 = (i1 + length vs1)%Z →
+    Lemma chunk_cslice_app_1 l sz dq i1 vs1 i2 vs2 :
+      i2 = i1 + length vs1 →
       chunk_cslice l sz i1 dq vs1 -∗
       chunk_cslice l sz i2 dq vs2 -∗
       chunk_cslice l sz i1 dq (vs1 ++ vs2).
@@ -677,9 +679,9 @@ Section zoo_G.
       rewrite chunk_cslice_app. iSteps.
     Qed.
 
-    Lemma chunk_cslice_app3 {l sz i dq vs} n1 (i1 : Z) n2 (i2 : Z) :
-      i1 = (i + n1)%Z →
-      i2 = (i1 + n2)%Z →
+    Lemma chunk_cslice_app3 {l sz i dq vs} n1 i1 n2 i2 :
+      i1 = i + n1 →
+      i2 = i1 + n2 →
       n1 ≤ length vs →
       n1 + n2 ≤ length vs →
       chunk_cslice l sz i dq vs ⊣⊢
@@ -751,8 +753,8 @@ Section zoo_G.
       chunk_cslice l sz (i + sz) dq vs.
     Proof.
       rewrite /chunk_cslice. apply big_sepL_proper. intros k v _.
-      assert ((i + sz + Z.of_nat k) `mod` sz = (i + Z.of_nat k) `mod` sz)%Z as Heq.
-      { rewrite -Z.add_assoc (Z.add_comm (Z.of_nat sz) (Z.of_nat k)) Z.add_assoc.
+      assert ((Z.of_nat (i + sz) + Z.of_nat k) `mod` Z.of_nat sz = (Z.of_nat i + Z.of_nat k) `mod` Z.of_nat sz)%Z as Heq.
+      { rewrite Nat2Z.inj_add -Z.add_assoc (Z.add_comm (Z.of_nat sz) (Z.of_nat k)) Z.add_assoc.
         rewrite -Zplus_mod_idemp_r Z_mod_same_full Z.add_0_r //. }
       rewrite Heq //.
     Qed.
@@ -765,13 +767,13 @@ Section zoo_G.
     Qed.
 
     Lemma chunk_cslice_shift_left l sz i dq vs :
-      (sz ≤ i)%Z →
+      sz ≤ i →
       chunk_cslice l sz i dq vs ⊣⊢
       chunk_cslice l sz (i - sz) dq vs.
     Proof.
       intros.
       rewrite (chunk_cslice_shift _ _ (i - sz)).
-      replace ((i - sz + sz))%Z with i by lia. done.
+      replace ((i - sz + sz)) with i by lia. done.
     Qed.
 
     Lemma chunk_cslice_mod l sz i dq vs :
@@ -781,15 +783,14 @@ Section zoo_G.
     Proof.
       intros.
       rewrite /chunk_cslice. apply big_sepL_proper. intros k v _.
-      assert ((i `mod` sz + Z.of_nat k) `mod` sz = (i + Z.of_nat k) `mod` sz)%Z as Heq.
-      { rewrite Z.add_mod_idemp_l //. lia. }
+      assert ((Z.of_nat (i `mod` sz) + Z.of_nat k) `mod` Z.of_nat sz = (Z.of_nat i + Z.of_nat k) `mod` Z.of_nat sz)%Z as Heq.
+      { rewrite Nat2Z.inj_mod Z.add_mod_idemp_l //. lia. }
       rewrite Heq //.
     Qed.
 
     #[local] Lemma chunk_cslice_to_model_aux l sz i dq vs :
       0 < sz →
-      (0 ≤ i)%Z →
-      (i + length vs ≤ sz)%Z →
+      i + length vs ≤ sz →
       chunk_cslice l sz i dq vs ⊣⊢
       chunk_model l i dq vs.
     Proof.
@@ -802,92 +803,89 @@ Section zoo_G.
       0 < sz →
       length vs ≤ sz →
       chunk_cslice l sz i dq vs ⊣⊢
-        chunk_model l (i `mod` sz) dq (take (sz - ₊(i `mod` sz)) vs) ∗
-        chunk_model l 0 dq (drop (sz - ₊(i `mod` sz)) vs).
+        chunk_model l (i `mod` sz) dq (take (sz - (i `mod` sz)) vs) ∗
+        chunk_model l 0 dq (drop (sz - (i `mod` sz)) vs).
     Proof.
       intros Hsz Hvs.
       rewrite chunk_cslice_mod //.
-      set m := (i `mod` Z.of_nat sz)%Z.
-      assert (Hm : (0 ≤ m < Z.of_nat sz)%Z).
-      { subst m. apply Z.mod_pos_bound. lia. }
-      assert (Hmnat : Z.of_nat ₊m = m) by lia.
-      destruct_decide (₊m + length vs ≤ sz) as Hcase.
+      set m := i `mod` sz.
+      assert (Hm : m < sz).
+      { subst m. apply Nat.mod_upper_bound. lia. }
+      destruct_decide (m + length vs ≤ sz) as Hcase.
       - rewrite firstn_all2; first lia.
         rewrite skipn_all2; first lia.
-        rewrite chunk_cslice_to_model_aux //; [lia | lia |].
+        pose proof (chunk_cslice_to_model_aux l sz m dq vs ltac:(lia) ltac:(lia)) as Heq.
+        rewrite Heq.
         iSplit; [iIntros "$"; iApply chunk_model_nil | iIntros "($ & _)"].
-      - rewrite -{1}(take_drop (sz - ₊m) vs).
+      - rewrite -{1}(take_drop (sz - m) vs).
         rewrite -chunk_cslice_app.
         rewrite length_take Nat.min_l; first lia.
         setoid_rewrite chunk_cslice_mod at 2; last done.
-        replace (m + Z.of_nat (sz - ₊m))%Z with (Z.of_nat sz).
-        2: { rewrite Nat2Z.inj_sub; first lia. lia. }
-        rewrite Z_mod_same_full.
-        rewrite (chunk_cslice_to_model_aux _ _ m) //; [lia | simpl_length; lia |].
-        rewrite (chunk_cslice_to_model_aux _ _ 0%Z) //; first (simpl_length; lia).
+        replace (m + (sz - m)) with sz by lia.
+        rewrite Nat.Div0.mod_same.
+        rewrite (chunk_cslice_to_model_aux _ _ m) //; first (simpl_length; lia).
+        rewrite (chunk_cslice_to_model_aux _ _ 0) //; simpl_length; lia.
     Qed.
     Lemma chunk_cslice_to_model_full l sz i dq vs :
       0 < sz →
       length vs = sz →
       chunk_cslice l sz i dq vs ⊣⊢
-      chunk_model l 0 dq (rotation (sz - ₊(i `mod` sz)) vs).
+      chunk_model l 0 dq (rotation (sz - (i `mod` sz)) vs).
     Proof.
       intros Hsz Hvs.
       rewrite chunk_cslice_to_model //; first lia.
-      assert (Hm : (0 ≤ i `mod` Z.of_nat sz < Z.of_nat sz)%Z).
-      { apply Z.mod_pos_bound. lia. }
+      assert (Hm : i `mod` sz < sz).
+      { apply Nat.mod_upper_bound. lia. }
       rewrite /rotation -chunk_model_app length_drop.
-      replace (Z.of_nat (length vs - (sz - ₊(i `mod` Z.of_nat sz))))%Z
-        with (i `mod` Z.of_nat sz)%Z.
-      2: { rewrite Hvs. rewrite Nat2Z.inj_sub; first lia. lia. }
-      rewrite Z.add_0_l. apply bi.sep_comm.
+      replace ((length vs - (sz - (i `mod` sz)))) with (i `mod` sz) by lia.
+      rewrite Nat.add_0_l. apply bi.sep_comm.
     Qed.
 
     Lemma chunk_cslice_rotation_right {l sz i1 dq vs} i2 n :
       0 < sz →
       length vs = sz →
-      i2 = (i1 + n)%Z →
+      i2 = i1 + n →
       chunk_cslice l sz i1 dq vs ⊣⊢
-      chunk_cslice l sz i2 dq (rotation (₊(n `mod` sz)) vs).
+      chunk_cslice l sz i2 dq (rotation (n `mod` sz) vs).
     Proof.
     Admitted.
     Lemma chunk_cslice_rotation_right_1 {l sz i1 dq vs} i2 n :
       0 < sz →
       length vs = sz →
-      i2 = (i1 + n)%Z →
+      i2 = i1 + n →
       chunk_cslice l sz i1 dq vs ⊢
-      chunk_cslice l sz i2 dq (rotation (₊(n `mod` sz)) vs).
+      chunk_cslice l sz i2 dq (rotation (n `mod` sz) vs).
     Proof.
     Admitted.
     Lemma chunk_cslice_rotation_right_0 {l sz dq vs} i :
       0 < sz →
       length vs = sz →
       chunk_cslice l sz 0 dq vs ⊣⊢
-      chunk_cslice l sz i dq (rotation (₊(i `mod` sz)) vs).
+      chunk_cslice l sz i dq (rotation (i `mod` sz) vs).
     Proof.
     Admitted.
 
     Lemma chunk_cslice_rotation_left {l sz i1 dq vs} i2 n :
       0 < sz →
       length vs = sz →
-      i1 = (i2 + n)%Z →
+      i1 = i2 + n →
       chunk_cslice l sz i1 dq vs ⊣⊢
-      chunk_cslice l sz i2 dq (rotation (sz - ₊(n `mod` sz)) vs).
+      chunk_cslice l sz i2 dq (rotation (sz - n `mod` sz) vs).
     Proof.
     Admitted.
     Lemma chunk_cslice_rotation_left_1 {l sz i1 dq vs} i2 n :
       0 < sz →
       length vs = sz →
-      i1 = (i2 + n)%Z →
+      i1 = i2 + n →
       chunk_cslice l sz i1 dq vs ⊢
-      chunk_cslice l sz i2 dq (rotation (sz - ₊(n `mod` sz)) vs).
+      chunk_cslice l sz i2 dq (rotation (sz - n `mod` sz) vs).
     Proof.
     Admitted.
     Lemma chunk_cslice_rotation_left_0 l sz i dq vs :
       0 < sz →
       length vs = sz →
       chunk_cslice l sz i dq vs ⊣⊢
-      chunk_cslice l sz 0 dq (rotation (sz - ₊(i `mod` sz)) vs).
+      chunk_cslice l sz 0 dq (rotation (sz - i `mod` sz) vs).
     Proof.
     Admitted.
 
@@ -1003,9 +1001,9 @@ Section zoo_G.
       iDestruct (chunk_cslice_cons with "Hcslice") as "(H↦1 & Hcslice)".
       destruct (lookup_lt_is_Some_2 vs (sz - 1)) as (v2 & Hlookup2); first lia.
       iDestruct (chunk_cslice_lookup with "Hcslice") as "H↦2"; first done.
-      assert (Heq : ((i + 1 + Z.of_nat (sz - 1)) `mod` Z.of_nat sz)%Z = (i `mod` Z.of_nat sz)%Z).
-      { transitivity ((i + Z.of_nat sz) `mod` Z.of_nat sz)%Z.
-        - f_equal. rewrite Nat2Z.inj_sub; first lia. lia.
+      assert (Heq : ((Z.of_nat (i + 1) + Z.of_nat (sz - 1)) `mod` Z.of_nat sz)%Z = (Z.of_nat i `mod` Z.of_nat sz)%Z).
+      { transitivity ((Z.of_nat i + Z.of_nat sz) `mod` Z.of_nat sz)%Z.
+        - f_equal. rewrite Nat2Z.inj_add Nat2Z.inj_sub; first lia. lia.
         - rewrite -{1}(Z.mul_1_l (Z.of_nat sz)) Z.mod_add //. lia. }
       rewrite Heq.
       iApply (pointsto_exclusive with "H↦1 H↦2").
@@ -1034,7 +1032,7 @@ Section zoo_G.
       iApply inv_alloc. iExists []. iSteps.
     Qed.
 
-    Lemma itype_chunk_shift (i : Z) τ `{!iType _ τ} (sz : nat) l :
+    Lemma itype_chunk_shift i τ `{!iType _ τ} (sz : nat) l :
       (0 ≤ i ≤ sz)%Z →
       itype_chunk τ sz l ⊢
       itype_chunk τ (sz - ₊i) (l +ₗ i).
