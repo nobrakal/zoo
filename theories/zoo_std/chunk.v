@@ -52,27 +52,21 @@ Section zoo_G.
       rewrite /chunk_model //.
     Qed.
 
-    Lemma chunk_model_singleton l dq v :
-      l ↦{dq} v ⊣⊢
-      chunk_model l 0 dq [v].
-    Proof.
-      rewrite /chunk_model big_sepL_singleton /=. done.
-    Qed.
-    Lemma chunk_model_singleton' l i dq v :
+    Lemma chunk_model_singleton l i dq v :
       l ↦[i]{dq} v ⊣⊢
       chunk_model l i dq [v].
     Proof.
       rewrite /chunk_model big_sepL_singleton /= Z.add_0_r //.
     Qed.
-    Lemma chunk_model_singleton_1 l dq v :
-      l ↦{dq} v ⊢
-      chunk_model l 0 dq [v].
+    Lemma chunk_model_singleton_1 l i dq v :
+      l ↦[i]{dq} v ⊢
+      chunk_model l i dq [v].
     Proof.
       rewrite chunk_model_singleton //.
     Qed.
-    Lemma chunk_model_singleton_2 l dq v :
-      chunk_model l 0 dq [v] ⊢
-      l ↦{dq} v.
+    Lemma chunk_model_singleton_2 l i dq v :
+      chunk_model l i dq [v] ⊢
+      l ↦[i]{dq} v.
     Proof.
       rewrite chunk_model_singleton //.
     Qed.
@@ -346,11 +340,11 @@ Section zoo_G.
       split; [done | apply _].
     Qed.
 
-    Lemma chunk_span_singleton l dq :
+    Lemma chunk_span_singleton l i dq :
       ( ∃ v,
-        l ↦{dq} v
+        l ↦[i]{dq} v
       ) ⊣⊢
-      chunk_span l 0 dq 1.
+      chunk_span l i dq 1.
     Proof.
       setoid_rewrite chunk_model_singleton. iSplit.
       - iIntros "(%v & Hmodel)".
@@ -358,16 +352,16 @@ Section zoo_G.
       - iIntros "(%vs & % & Hmodel)".
         destruct vs as [| v []]; try done. iSteps.
     Qed.
-    Lemma chunk_span_singleton_1 l dq v :
-      l ↦{dq} v ⊢
-      chunk_span l 0 dq 1.
+    Lemma chunk_span_singleton_1 l i dq v :
+      l ↦[i]{dq} v ⊢
+      chunk_span l i dq 1.
     Proof.
       rewrite -chunk_span_singleton. iSteps.
     Qed.
-    Lemma chunk_span_singleton_2 l dq :
-      chunk_span l 0 dq 1 ⊢
+    Lemma chunk_span_singleton_2 l i dq :
+      chunk_span l i dq 1 ⊢
         ∃ v,
-        l ↦{dq} v.
+        l ↦[i]{dq} v.
     Proof.
       rewrite chunk_span_singleton. iSteps.
     Qed.
@@ -514,38 +508,6 @@ Section zoo_G.
       iIntros "%Hi Hspan".
       iDestruct (chunk_span_lookup_acc with "Hspan") as "(%v & H↦ & _)"; first done.
       iSteps.
-    Qed.
-
-    Lemma chunk_span_update' {l i dq n} (j : Z) :
-      (i ≤ j < i + n)%Z →
-      chunk_span l i dq n ⊢
-        ∃ v,
-        l ↦[j]{dq} v ∗
-        ( ∀ w,
-          l ↦[j]{dq} w -∗
-          chunk_span l i dq n
-        ).
-    Proof.
-      apply chunk_span_update.
-    Qed.
-    Lemma chunk_span_lookup_acc' {l i dq n} (j : Z) :
-      (i ≤ j < i + n)%Z →
-      chunk_span l i dq n ⊢
-        ∃ v,
-        l ↦[j]{dq} v ∗
-        ( l ↦[j]{dq} v -∗
-          chunk_span l i dq n
-        ).
-    Proof.
-      apply chunk_span_lookup_acc.
-    Qed.
-    Lemma chunk_span_lookup' {l i dq n} (j : Z) :
-      (i ≤ j < i + n)%Z →
-      chunk_span l i dq n ⊢
-        ∃ v,
-        l ↦[j]{dq} v.
-    Proof.
-      apply chunk_span_lookup.
     Qed.
 
     Lemma chunk_span_valid l dq n :
@@ -852,18 +814,20 @@ Section zoo_G.
     Proof.
     Admitted.
 
-    Lemma chunk_cslice_rotation_right {l sz i dq vs} n :
+    Lemma chunk_cslice_rotation_right {l sz i1 dq vs} i2 n :
       0 < sz →
       length vs = sz →
-      chunk_cslice l sz i dq vs ⊣⊢
-      chunk_cslice l sz (i + n) dq (rotation (₊(n `mod` sz)) vs).
+      i2 = (i1 + n)%Z →
+      chunk_cslice l sz i1 dq vs ⊣⊢
+      chunk_cslice l sz i2 dq (rotation (₊(n `mod` sz)) vs).
     Proof.
     Admitted.
-    Lemma chunk_cslice_rotation_right_1 {l sz i dq vs} n :
+    Lemma chunk_cslice_rotation_right_1 {l sz i1 dq vs} i2 n :
       0 < sz →
       length vs = sz →
-      chunk_cslice l sz i dq vs ⊢
-      chunk_cslice l sz (i + n) dq (rotation (₊(n `mod` sz)) vs).
+      i2 = (i1 + n)%Z →
+      chunk_cslice l sz i1 dq vs ⊢
+      chunk_cslice l sz i2 dq (rotation (₊(n `mod` sz)) vs).
     Proof.
     Admitted.
     Lemma chunk_cslice_rotation_right_0 {l sz dq vs} i :
@@ -874,35 +838,20 @@ Section zoo_G.
     Proof.
     Admitted.
 
-    Lemma chunk_cslice_rotation_right' {l sz i1 dq vs} i2 n :
+    Lemma chunk_cslice_rotation_left {l sz i1 dq vs} i2 n :
       0 < sz →
       length vs = sz →
-      i2 = (i1 + n)%Z →
+      i1 = (i2 + n)%Z →
       chunk_cslice l sz i1 dq vs ⊣⊢
-      chunk_cslice l sz i2 dq (rotation (₊(n `mod` sz)) vs).
+      chunk_cslice l sz i2 dq (rotation (sz - ₊(n `mod` sz)) vs).
     Proof.
     Admitted.
-    Lemma chunk_cslice_rotation_right_1' {l sz i1 dq vs} i2 n :
+    Lemma chunk_cslice_rotation_left_1 {l sz i1 dq vs} i2 n :
       0 < sz →
       length vs = sz →
-      i2 = (i1 + n)%Z →
+      i1 = (i2 + n)%Z →
       chunk_cslice l sz i1 dq vs ⊢
-      chunk_cslice l sz i2 dq (rotation (₊(n `mod` sz)) vs).
-    Proof.
-    Admitted.
-
-    Lemma chunk_cslice_rotation_left l sz i n dq vs :
-      0 < sz →
-      length vs = sz →
-      chunk_cslice l sz (i + n) dq vs ⊣⊢
-      chunk_cslice l sz i dq (rotation (sz - ₊(n `mod` sz)) vs).
-    Proof.
-    Admitted.
-    Lemma chunk_cslice_rotation_left_1 l sz i n dq vs :
-      0 < sz →
-      length vs = sz →
-      chunk_cslice l sz (i + n) dq vs ⊢
-      chunk_cslice l sz i dq (rotation (sz - ₊(n `mod` sz)) vs).
+      chunk_cslice l sz i2 dq (rotation (sz - ₊(n `mod` sz)) vs).
     Proof.
     Admitted.
     Lemma chunk_cslice_rotation_left_0 l sz i dq vs :
@@ -910,23 +859,6 @@ Section zoo_G.
       length vs = sz →
       chunk_cslice l sz i dq vs ⊣⊢
       chunk_cslice l sz 0 dq (rotation (sz - ₊(i `mod` sz)) vs).
-    Proof.
-    Admitted.
-
-    Lemma chunk_cslice_rotation_left' {l sz i1 dq vs} i2 n :
-      0 < sz →
-      length vs = sz →
-      i1 = (i2 + n)%Z →
-      chunk_cslice l sz i1 dq vs ⊣⊢
-      chunk_cslice l sz i2 dq (rotation (sz - ₊(n `mod` sz)) vs).
-    Proof.
-    Admitted.
-    Lemma chunk_cslice_rotation_left_1' {l sz i1 dq vs} i2 n :
-      0 < sz →
-      length vs = sz →
-      i1 = (i2 + n)%Z →
-      chunk_cslice l sz i1 dq vs ⊢
-      chunk_cslice l sz i2 dq (rotation (sz - ₊(n `mod` sz)) vs).
     Proof.
     Admitted.
 

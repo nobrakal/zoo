@@ -882,7 +882,7 @@ Section zoo_G.
     Proof.
       intros Hsz Hvs.
       rewrite /array_cslice.
-      setoid_rewrite (chunk_cslice_rotation_right n) at 1; [| done..].
+      setoid_rewrite (chunk_cslice_rotation_right _ n) at 1; [| done..].
       setoid_rewrite Nat2Z.inj_add at 1.
       setoid_rewrite <- Nat2Z.inj_mod.
       setoid_rewrite Nat2Z.id.
@@ -981,7 +981,7 @@ Section zoo_G.
       intros Hsz Hvs.
       rewrite /array_cslice.
       setoid_rewrite Nat2Z.inj_add at 1.
-      setoid_rewrite (chunk_cslice_rotation_left _ _ _ n) at 1; [| done..].
+      setoid_rewrite (chunk_cslice_rotation_left _ n) at 1; [| done..].
       setoid_rewrite <- Nat2Z.inj_mod.
       setoid_rewrite Nat2Z.id.
       done.
@@ -8187,7 +8187,7 @@ Section zoo_G.
       opose proof* (list_lookup_lookup_total_lt vs i); first lia.
       iDestruct (chunk_model_lookup_acc i with "Hmodel") as "(H↦ & Hmodel)"; [lia | done | lia |].
       iDestruct (big_sepL_lookup with "Hvs") as "Hv"; first done.
-      rewrite /array_slice chunk_model_singleton'.
+      rewrite /array_slice chunk_model_singleton.
       iAaccIntro with "[$H↦]"; iSteps.
   Qed.
 
@@ -8242,7 +8242,7 @@ Section zoo_G.
       opose proof* (list_lookup_lookup_total_lt vs i); first lia.
       iDestruct (chunk_model_lookup_acc i with "Hmodel") as "(H↦ & Hmodel)"; [lia | done | lia |].
       iDestruct (big_sepL_lookup with "Hvs") as "Hv"; first done.
-      rewrite /array_slice chunk_model_singleton'.
+      rewrite /array_slice chunk_model_singleton.
       iAaccIntro with "[$H↦]"; iSteps.
   Qed.
 
