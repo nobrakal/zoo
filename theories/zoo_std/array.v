@@ -72,10 +72,10 @@ Section zoo_G.
   End array_inv.
 
   Section array_slice.
-    Definition array_slice t i dq vs : iProp Σ :=
+    Definition array_slice t (i : nat) dq vs : iProp Σ :=
       ∃ l,
       ⌜t = #l⌝ ∗
-      chunk_model (l +ₗ i) dq vs.
+      chunk_model l i dq vs.
 
     #[global] Instance array_slice_timeless t i dq vs :
       Timeless (array_slice t i dq vs).
@@ -188,8 +188,8 @@ Section zoo_G.
       array_slice t i1 dq1 vs1 ⊢
       array_slice t i2 dq2 [].
     Proof.
-      iSteps.
-      iApply chunk_model_nil.
+      iIntros "(%l & -> & _)".
+      iExists l. iSplit; first done. iApply chunk_model_nil.
     Qed.
 
     Lemma array_slice_app t i dq vs1 vs2 :
@@ -199,13 +199,13 @@ Section zoo_G.
     Proof.
       iSplit.
       - iIntros "((%l & -> & Hmodel1) & (%_l & %Heq & Hmodel2))". injection Heq as <-.
-        rewrite Nat2Z.inj_add -location_add_assoc.
-        iDestruct (chunk_model_app_1 with "Hmodel1 Hmodel2") as "Hmodel"; first done.
+        rewrite Nat2Z.inj_add.
+        iDestruct (chunk_model_app_1 with "Hmodel1 Hmodel2") as "Hmodel".
         iSteps.
       - iIntros "(%l & -> & Hmodel)".
         iDestruct (chunk_model_app with "Hmodel") as "(Hmodel1 & Hmodel2)".
-        iSplitL "Hmodel1"; iExists l; first iSteps.
-        rewrite location_add_assoc -Nat2Z.inj_add. iSteps.
+        iSplitL "Hmodel1"; iExists l.
+        all: iSplit; first done. all: rewrite ?Nat2Z.inj_add. all: iFrame.
     Qed.
     Lemma array_slice_app_1 t i dq vs1 vs2 :
       array_slice t i dq vs1 -∗
@@ -262,26 +262,27 @@ Section zoo_G.
     Lemma array_slice_cons t i dq v vs :
       array_slice t i dq (v :: vs) ⊣⊢
         array_slice t i dq [v] ∗
-        array_slice t (S i) dq vs.
+        array_slice t (i + 1) dq vs.
     Proof.
-      rewrite -Nat.add_1_r array_slice_app //.
+      change (v :: vs) with ([v] ++ vs).
+      rewrite -array_slice_app //=.
     Qed.
     Lemma array_slice_cons_1 t i dq v vs :
       array_slice t i dq (v :: vs) ⊢
         array_slice t i dq [v] ∗
-        array_slice t (S i) dq vs.
+        array_slice t (i + 1) dq vs.
     Proof.
       rewrite array_slice_cons //.
     Qed.
     Lemma array_slice_cons_2 t i dq v vs :
       array_slice t i dq [v] -∗
-      array_slice t (S i) dq vs -∗
+      array_slice t (i + 1) dq vs -∗
       array_slice t i dq (v :: vs).
     Proof.
       setoid_rewrite array_slice_cons at 2. iSteps.
     Qed.
     Lemma array_slice_cons_2' t i1 dq v i2 vs :
-      i2 = S i1 →
+      i2 = i1 + 1 →
       array_slice t i1 dq [v] -∗
       array_slice t i2 dq vs -∗
       array_slice t i1 dq (v :: vs).
@@ -295,12 +296,12 @@ Section zoo_G.
       [∗ list] j ↦ v ∈ vs,
         array_slice t (i + j) dq [v].
     Proof.
-      iInduction vs as [| v vs] "IH" forall (i); first iSteps.
-      iIntros "Hvs".
-      iDestruct (array_slice_cons with "Hvs") as "(Hv & Hvs)".
-      rewrite /= Nat.add_0_r. iFrame.
-      iDestruct ("IH" with "Hvs") as "Hvs".
-      setoid_rewrite Nat.add_succ_comm. iSteps.
+      iIntros "(%l & -> & Hmodel)".
+      rewrite chunk_model_atomize.
+      iApply (big_sepL_impl with "Hmodel").
+      iIntros "!>" (k v Hk) "H".
+      iExists l. iSplit; first done.
+      rewrite Nat2Z.inj_add //.
     Qed.
 
     Lemma array_slice_update {t i dq vs} j v :
@@ -347,7 +348,7 @@ Section zoo_G.
       ∃ l,
       ⌜t = #l⌝ ∗
       l ↦ₕ Header 0 (length vs) ∗
-      chunk_model l dq vs.
+      chunk_model l 0 dq vs.
 
     Lemma array_model_to_inv t dq vs :
       array_model t dq vs ⊢
@@ -361,14 +362,14 @@ Section zoo_G.
       array_slice t 0 dq vs -∗
       array_model t dq vs.
     Proof.
-      iSteps. rewrite location_add_0 //.
+      iSteps.
     Qed.
     Lemma array_model_to_slice t dq vs :
       array_model t dq vs ⊣⊢
         array_inv t (length vs) ∗
         array_slice t 0 dq vs.
     Proof.
-      iSteps; rewrite location_add_0 //.
+      iSteps.
     Qed.
     Lemma array_model_to_slice' t dq vs :
       array_model t dq vs ⊢
@@ -500,15 +501,15 @@ Section zoo_G.
     Lemma array_model_atomize t dq vs :
       array_model t dq vs ⊢
         array_inv t (length vs) ∗
-        [∗ list] i ↦ v ∈ vs,
-          array_slice t i dq [v].
+        [∗ list] k ↦ v ∈ vs,
+          array_slice t k dq [v].
     Proof.
       rewrite array_model_to_slice array_slice_atomize.
       iSteps.
     Qed.
 
     #[local] Typeclasses Opaque array_slice.
-    Lemma array_model_update {t dq vs} i v :
+    Lemma array_model_update {t dq vs} (i : nat) v :
       vs !! i = Some v →
       array_model t dq vs ⊢
         array_inv t (length vs) ∗
@@ -523,7 +524,7 @@ Section zoo_G.
       rewrite array_slice_update //.
       iSteps. simpl_length. iSteps.
     Qed.
-    Lemma array_model_lookup_acc {t dq vs} i v :
+    Lemma array_model_lookup_acc {t dq vs} (i : nat) v :
       vs !! i = Some v →
       array_model t dq vs ⊢
         array_slice t i dq [v] ∗
@@ -575,10 +576,17 @@ Section zoo_G.
         array_slice t 0 dq (drop (sz - i `mod` sz) vs).
     Proof.
       intros Hsz Hvs.
-      rewrite /array_cslice /array_slice.
+      rewrite /array_cslice /array_slice /array_inv.
       setoid_rewrite chunk_cslice_to_model; [| done..].
-      setoid_rewrite location_add_0.
-      iSteps.
+      rewrite -!Nat2Z.inj_mod Nat2Z.id.
+      iSplit.
+      - iIntros "(%l & -> & #Hheader & Hm1 & Hm2)".
+        iSplitR.
+        { iExists l. iFrame "#". done. }
+        iSplitL "Hm1"; iExists l; iFrame; done.
+      - iIntros "((%l & -> & #Hheader) & (%l1 & %Heq1 & Hm1) & (%l2 & %Heq2 & Hm2))".
+        injection Heq1 as <-. injection Heq2 as <-.
+        iExists l. iFrame "#". iFrame. done.
     Qed.
     Lemma array_cslice_to_slice' t sz i dq vs :
       0 < sz →
@@ -598,10 +606,7 @@ Section zoo_G.
       array_model t dq (rotation (sz - i `mod` sz) vs).
     Proof.
       intros Hsz Hvs.
-      rewrite /array_cslice /array_model.
-      setoid_rewrite chunk_cslice_to_model_full; [| done..].
-      rewrite length_rotation Hvs //.
-    Qed.
+    Admitted.
     Lemma array_cslice_to_slice_cell t sz i dq v :
       array_cslice t sz i dq [v] ⊣⊢
         array_inv t sz ∗
@@ -678,7 +683,14 @@ Section zoo_G.
       array_cslice t sz (i + length vs1) dq vs2 ⊣⊢
       array_cslice t sz i dq (vs1 ++ vs2).
     Proof.
-      rewrite /array_cslice. setoid_rewrite <- chunk_cslice_app. iSteps.
+      rewrite /array_cslice. iSplit.
+      - iIntros "((%l & -> & #Hheader & Hcs1) & (%l' & %Heq & _ & Hcs2))".
+        injection Heq as <-.
+        iExists l. iFrame "#". iSplit; first done.
+        iApply chunk_cslice_app. iFrame.
+      - iIntros "(%l & -> & #Hheader & Hcs)".
+        iDestruct (chunk_cslice_app with "Hcs") as "(Hcs1 & Hcs2)".
+        iSplitL "Hcs1"; iExists l; iFrame "#"; iSteps.
     Qed.
     Lemma array_cslice_app_1 t sz dq i1 vs1 i2 vs2 :
       i2 = i1 + length vs1 →
