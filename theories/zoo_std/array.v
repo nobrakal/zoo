@@ -199,13 +199,12 @@ Section zoo_G.
     Proof.
       iSplit.
       - iIntros "((%l & -> & Hmodel1) & (%_l & %Heq & Hmodel2))". injection Heq as <-.
-        rewrite Nat2Z.inj_add.
         iDestruct (chunk_model_app_1 with "Hmodel1 Hmodel2") as "Hmodel".
         iSteps.
       - iIntros "(%l & -> & Hmodel)".
         iDestruct (chunk_model_app with "Hmodel") as "(Hmodel1 & Hmodel2)".
         iSplitL "Hmodel1"; iExists l.
-        all: iSplit; first done. all: rewrite ?Nat2Z.inj_add. all: iFrame.
+        all: iSplit; first done. all: iFrame.
     Qed.
     Lemma array_slice_app_1 t i dq vs1 vs2 :
       array_slice t i dq vs1 -∗
@@ -301,7 +300,7 @@ Section zoo_G.
       iApply (big_sepL_impl with "Hmodel").
       iIntros "!>" (k v Hk) "H".
       iExists l. iSplit; first done.
-      rewrite Nat2Z.inj_add //.
+      done.
     Qed.
 
     Lemma array_slice_update {t i dq vs} j v :
@@ -564,7 +563,7 @@ Section zoo_G.
       array_model t dq vs ⊢
       array_cslice t (length vs) 0 dq vs.
     Proof.
-      rewrite /array_model /array_slice /array_cslice.
+      rewrite /array_model /array_cslice.
       setoid_rewrite chunk_model_to_cslice. done.
     Qed.
     Lemma array_cslice_to_slice t sz i dq vs :
@@ -578,7 +577,6 @@ Section zoo_G.
       intros Hsz Hvs.
       rewrite /array_cslice /array_slice /array_inv.
       setoid_rewrite chunk_cslice_to_model; [| done..].
-      rewrite -!Nat2Z.inj_mod Nat2Z.id.
       iSplit.
       - iIntros "(%l & -> & #Hheader & Hm1 & Hm2)".
         iSplitR.
@@ -612,8 +610,8 @@ Section zoo_G.
         array_inv t sz ∗
         array_slice t (i `mod` sz) dq [v].
     Proof.
-      rewrite /array_slice Nat2Z.inj_mod.
-      setoid_rewrite chunk_model_cslice_cell.
+      rewrite /array_slice /array_cslice /array_inv.
+      setoid_rewrite <- chunk_model_cslice_cell.
       iSteps.
     Qed.
     Lemma array_cslice_to_slice_cell' t sz i dq v :
@@ -686,12 +684,10 @@ Section zoo_G.
       rewrite /array_cslice. iSplit.
       - iIntros "((%l & -> & #Hheader & Hcs1) & (%l' & %Heq & _ & Hcs2))".
         injection Heq as <-.
-        rewrite Nat2Z.inj_add.
         iDestruct (chunk_cslice_app_1 with "Hcs1 Hcs2") as "Hcs"; first done.
         iExists l. iFrame "#". iFrame. done.
       - iIntros "(%l & -> & #Hheader & Hcs)".
         iDestruct (chunk_cslice_app with "Hcs") as "(Hcs1 & Hcs2)".
-        rewrite -Nat2Z.inj_add.
         iSplitL "Hcs1"; iExists l; iFrame "#"; iFrame; done.
     Qed.
     Lemma array_cslice_app_1 t sz dq i1 vs1 i2 vs2 :
@@ -798,8 +794,8 @@ Section zoo_G.
       iDestruct (chunk_cslice_update j with "Hcs") as "(H↦ & Hcs)"; first done.
       iSplitL "H↦".
       { iExists l. iFrame "#". iSplit; first done.
-        iApply chunk_cslice_singleton_1.
-        rewrite Nat2Z.inj_add. done. }
+        iEval (rewrite -Nat2Z.inj_add) in "H↦".
+        iApply (chunk_cslice_singleton_1 with "H↦"). }
       iIntros (w) "(%l' & %Heq & _ & Hw)". injection Heq as <-.
       iDestruct (chunk_cslice_singleton_2 with "Hw") as "Hw".
       iEval (rewrite Nat2Z.inj_add) in "Hw".
@@ -832,10 +828,8 @@ Section zoo_G.
       rewrite /array_cslice. iSplit.
       - iIntros "(%l & -> & #Hheader & Hcs)".
         iEval (rewrite chunk_cslice_shift) in "Hcs".
-        iExists l. iFrame "#". iSplit; first done.
-        rewrite Nat2Z.inj_add. iFrame.
+        iExists l. iFrame "#". iSplit; first done. iFrame.
       - iIntros "(%l & -> & #Hheader & Hcs)".
-        iEval (rewrite Nat2Z.inj_add) in "Hcs".
         iEval (rewrite -chunk_cslice_shift) in "Hcs".
         iExists l. iFrame "#". iSplit; first done. iFrame.
     Qed.
@@ -882,11 +876,7 @@ Section zoo_G.
     Proof.
       intros Hsz Hvs.
       rewrite /array_cslice.
-      setoid_rewrite (chunk_cslice_rotation_right _ n) at 1; [| done..].
-      setoid_rewrite Nat2Z.inj_add at 1.
-      setoid_rewrite <- Nat2Z.inj_mod.
-      setoid_rewrite Nat2Z.id.
-      done.
+      setoid_rewrite (chunk_cslice_rotation_right n) at 1; done.
     Qed.
     Lemma array_cslice_rotation_right_1 {t sz i dq vs} n :
       0 < sz →
@@ -980,11 +970,7 @@ Section zoo_G.
     Proof.
       intros Hsz Hvs.
       rewrite /array_cslice.
-      setoid_rewrite Nat2Z.inj_add at 1.
-      setoid_rewrite (chunk_cslice_rotation_left _ n) at 1; [| done..].
-      setoid_rewrite <- Nat2Z.inj_mod.
-      setoid_rewrite Nat2Z.id.
-      done.
+      setoid_rewrite (chunk_cslice_rotation_left _ _ _ n) at 1; done.
     Qed.
     Lemma array_cslice_rotation_left_1 t sz i n dq vs :
       0 < sz →

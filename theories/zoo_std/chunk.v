@@ -608,7 +608,7 @@ Section zoo_G.
       split; [done | apply _].
     Qed.
 
-    Lemma chunk_model_to_cslice l i dq vs :
+    Lemma chunk_model_to_cslice l dq vs :
       chunk_model l 0 dq vs ⊢
       chunk_cslice l (length vs) 0 dq vs.
     Proof.
@@ -841,53 +841,162 @@ Section zoo_G.
       rewrite Nat.add_0_l. apply bi.sep_comm.
     Qed.
 
-    Lemma chunk_cslice_rotation_right {l sz i1 dq vs} i2 n :
+    #[local] Lemma chunk_cslice_rotation_right_aux {l sz} i1 i2 dq vs :
       0 < sz →
       length vs = sz →
-      i2 = i1 + n →
+      i1 `mod` sz ≤ i2 `mod` sz →
       chunk_cslice l sz i1 dq vs ⊣⊢
-      chunk_cslice l sz i2 dq (rotation (n `mod` sz) vs).
+      chunk_cslice l sz i2 dq (rotation (i2 `mod` sz - i1 `mod` sz) vs).
     Proof.
-    Admitted.
-    Lemma chunk_cslice_rotation_right_1 {l sz i1 dq vs} i2 n :
+      intros.
+
+      pose j1 := i1 `mod` sz.
+      pose j2 := i2 `mod` sz.
+
+      setoid_rewrite chunk_cslice_mod; [| done..].
+
+      setoid_rewrite (chunk_cslice_app3 (j2 - j1) j2 (sz - j2) sz) at 1; [| lia..].
+      setoid_rewrite (chunk_cslice_app3 (sz - j2) sz j1 (j1 + sz)) at 4; [| simpl_length; lia..].
+
+      rewrite (chunk_cslice_shift_left _ _ (j1 + sz)); first lia.
+      rewrite Nat.add_sub.
+      rewrite (drop_app_length' _ _ (sz - j2 + j1)).
+      { simpl_length. lia. }
+
+      rewrite (take_app_le _ _ (sz - j2)).
+      { simpl_length. lia. }
+      rewrite (take_drop_commute _ j1 (sz - j2)) take_app_length'.
+      { simpl_length. lia. }
+      rewrite drop_drop.
+
+      iSteps.
+    Qed.
+    Lemma chunk_cslice_rotation_right {l sz i dq vs} n :
       0 < sz →
       length vs = sz →
-      i2 = i1 + n →
-      chunk_cslice l sz i1 dq vs ⊢
-      chunk_cslice l sz i2 dq (rotation (n `mod` sz) vs).
+      chunk_cslice l sz i dq vs ⊣⊢
+      chunk_cslice l sz (i + n) dq (rotation (n `mod` sz) vs).
     Proof.
-    Admitted.
+      intros.
+
+      pose i1 := i.
+      pose i2 := i + n.
+
+      pose j1 := i1 `mod` sz.
+      pose j2 := i2 `mod` sz.
+
+      destruct (Nat.le_ge_cases j1 j2).
+
+      - rewrite chunk_cslice_rotation_right_aux // minus_mod_1'' //; first lia.
+
+      - rewrite (chunk_cslice_rotation_right_aux i2 i1) //; first  simpl_length.
+        rewrite minus_mod_2; [lia.. |].
+        rewrite Nat.add_sub'.
+        destruct_decide (n `mod` sz = 0) as -> | ?.
+        + rewrite Nat.sub_0_r Nat.Div0.mod_same !rotation_0 //.
+        + rewrite Nat.mod_small; first lia.
+          rewrite /rotation drop_app_length'.
+          { simpl_length. lia. }
+          rewrite take_app_length'.
+          { simpl_length. lia. }
+          rewrite take_drop //.
+    Qed.
+    Lemma chunk_cslice_rotation_right_1 {l sz i dq vs} n :
+      0 < sz →
+      length vs = sz →
+      chunk_cslice l sz i dq vs ⊢
+      chunk_cslice l sz (i + n) dq (rotation (n `mod` sz) vs).
+    Proof.
+      intros.
+      rewrite chunk_cslice_rotation_right //.
+    Qed.
     Lemma chunk_cslice_rotation_right_0 {l sz dq vs} i :
       0 < sz →
       length vs = sz →
       chunk_cslice l sz 0 dq vs ⊣⊢
       chunk_cslice l sz i dq (rotation (i `mod` sz) vs).
     Proof.
-    Admitted.
+      intros.
+      rewrite chunk_cslice_rotation_right //.
+    Qed.
 
-    Lemma chunk_cslice_rotation_left {l sz i1 dq vs} i2 n :
+    Lemma chunk_cslice_rotation_right' {l sz i1 dq vs} i2 n :
       0 < sz →
       length vs = sz →
-      i1 = i2 + n →
+      i2 = i1 + n →
       chunk_cslice l sz i1 dq vs ⊣⊢
-      chunk_cslice l sz i2 dq (rotation (sz - n `mod` sz) vs).
+      chunk_cslice l sz i2 dq (rotation (n `mod` sz) vs).
     Proof.
-    Admitted.
-    Lemma chunk_cslice_rotation_left_1 {l sz i1 dq vs} i2 n :
+      intros Hsz Hvs ->.
+      rewrite chunk_cslice_rotation_right //.
+    Qed.
+    Lemma chunk_cslice_rotation_right_1' {l sz i1 dq vs} i2 n :
       0 < sz →
       length vs = sz →
-      i1 = i2 + n →
+      i2 = i1 + n →
       chunk_cslice l sz i1 dq vs ⊢
-      chunk_cslice l sz i2 dq (rotation (sz - n `mod` sz) vs).
+      chunk_cslice l sz i2 dq (rotation (n `mod` sz) vs).
     Proof.
-    Admitted.
+      intros.
+      rewrite chunk_cslice_rotation_right' //.
+    Qed.
+
+    Lemma chunk_cslice_rotation_left l sz i n dq vs :
+      0 < sz →
+      length vs = sz →
+      chunk_cslice l sz (i + n) dq vs ⊣⊢
+      chunk_cslice l sz i dq (rotation (sz - n `mod` sz) vs).
+    Proof.
+      intros.
+      pose ws := (rotation (sz - n `mod` sz) vs).
+      replace vs with (rotation (n `mod` sz) ws) at 1; first last.
+      { rewrite -(take_drop (sz - n `mod` sz) vs) /ws.
+        rewrite /rotation drop_app_length'.
+        { simpl_length. lia. }
+        rewrite take_app_length' //.
+        { simpl_length. lia. }
+      }
+      rewrite -chunk_cslice_rotation_right //.
+      { rewrite /ws. simpl_length. }
+    Qed.
+    Lemma chunk_cslice_rotation_left_1 l sz i n dq vs :
+      0 < sz →
+      length vs = sz →
+      chunk_cslice l sz (i + n) dq vs ⊢
+      chunk_cslice l sz i dq (rotation (sz - n `mod` sz) vs).
+    Proof.
+      intros.
+      rewrite chunk_cslice_rotation_left //.
+    Qed.
     Lemma chunk_cslice_rotation_left_0 l sz i dq vs :
       0 < sz →
       length vs = sz →
       chunk_cslice l sz i dq vs ⊣⊢
       chunk_cslice l sz 0 dq (rotation (sz - i `mod` sz) vs).
     Proof.
-    Admitted.
+      apply (chunk_cslice_rotation_left _ _ 0).
+    Qed.
+
+    Lemma chunk_cslice_rotation_left' {l sz i1 dq vs} i2 n :
+      0 < sz →
+      length vs = sz →
+      i1 = i2 + n →
+      chunk_cslice l sz i1 dq vs ⊣⊢
+      chunk_cslice l sz i2 dq (rotation (sz - n `mod` sz) vs).
+    Proof.
+      intros Hsz Hvs ->.
+      rewrite chunk_cslice_rotation_left //.
+    Qed.
+    Lemma chunk_cslice_rotation_left_1' {l sz i1 dq vs} i2 n :
+      0 < sz →
+      length vs = sz →
+      i1 = i2 + n →
+      chunk_cslice l sz i1 dq vs ⊢
+      chunk_cslice l sz i2 dq (rotation (sz - n `mod` sz) vs).
+    Proof.
+      intros.
+      rewrite chunk_cslice_rotation_left' //.
+    Qed.
 
     Lemma chunk_cslice_rebase {l sz i1 dq vs1} i2 :
       0 < sz →
@@ -900,7 +1009,17 @@ Section zoo_G.
           chunk_cslice l sz i1 dq vs1
         ).
     Proof.
-    Admitted.
+      iIntros "%Hsz %Hvs Hcslice".
+      destruct_decide (i1 ≤ i2).
+      1: iDestruct (chunk_cslice_rotation_right_1' i2 (i2 - i1) with "Hcslice") as "$"; [lia.. |].
+      2: iDestruct (chunk_cslice_rotation_left_1' i2 (i1 - i2) with "Hcslice") as "$"; [lia.. |].
+      all: iStep.
+      all: iIntros "Hcslice".
+      1: iDestruct (chunk_cslice_rotation_left_1' i1 (i2 - i1) with "Hcslice") as "Hcslice"; [done | simpl_length | lia |].
+      2: iDestruct (chunk_cslice_rotation_right_1' i1 (i1 - i2) with "Hcslice") as "Hcslice"; [done | simpl_length | lia |].
+      all: rewrite rotation_add; first lia.
+      all: rewrite rotation_length //; first lia.
+    Qed.
 
     Lemma chunk_cslice_valid l sz i dq vs :
       0 < length vs →
@@ -1031,13 +1150,6 @@ Section zoo_G.
     Proof.
       iApply inv_alloc. iExists []. iSteps.
     Qed.
-
-    Lemma itype_chunk_shift i τ `{!iType _ τ} (sz : nat) l :
-      (0 ≤ i ≤ sz)%Z →
-      itype_chunk τ sz l ⊢
-      itype_chunk τ (sz - ₊i) (l +ₗ i).
-    Proof.
-    Admitted.
 
     Lemma itype_chunk_le sz' τ `{!iType _ τ} sz l :
       (sz' ≤ sz) →
