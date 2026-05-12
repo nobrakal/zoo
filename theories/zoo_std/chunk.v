@@ -805,14 +805,43 @@ Section zoo_G.
         chunk_model l (i `mod` sz) dq (take (sz - ₊(i `mod` sz)) vs) ∗
         chunk_model l 0 dq (drop (sz - ₊(i `mod` sz)) vs).
     Proof.
-    Admitted.
+      intros Hsz Hvs.
+      rewrite chunk_cslice_mod //.
+      set m := (i `mod` Z.of_nat sz)%Z.
+      assert (Hm : (0 ≤ m < Z.of_nat sz)%Z).
+      { subst m. apply Z.mod_pos_bound. lia. }
+      assert (Hmnat : Z.of_nat ₊m = m) by lia.
+      destruct_decide (₊m + length vs ≤ sz) as Hcase.
+      - rewrite firstn_all2; first lia.
+        rewrite skipn_all2; first lia.
+        rewrite chunk_cslice_to_model_aux //; [lia | lia |].
+        iSplit; [iIntros "$"; iApply chunk_model_nil | iIntros "($ & _)"].
+      - rewrite -{1}(take_drop (sz - ₊m) vs).
+        rewrite -chunk_cslice_app.
+        rewrite length_take Nat.min_l; first lia.
+        setoid_rewrite chunk_cslice_mod at 2; last done.
+        replace (m + Z.of_nat (sz - ₊m))%Z with (Z.of_nat sz).
+        2: { rewrite Nat2Z.inj_sub; first lia. lia. }
+        rewrite Z_mod_same_full.
+        rewrite (chunk_cslice_to_model_aux _ _ m) //; [lia | simpl_length; lia |].
+        rewrite (chunk_cslice_to_model_aux _ _ 0%Z) //; first (simpl_length; lia).
+    Qed.
     Lemma chunk_cslice_to_model_full l sz i dq vs :
       0 < sz →
       length vs = sz →
       chunk_cslice l sz i dq vs ⊣⊢
       chunk_model l 0 dq (rotation (sz - ₊(i `mod` sz)) vs).
     Proof.
-    Admitted.
+      intros Hsz Hvs.
+      rewrite chunk_cslice_to_model //; first lia.
+      assert (Hm : (0 ≤ i `mod` Z.of_nat sz < Z.of_nat sz)%Z).
+      { apply Z.mod_pos_bound. lia. }
+      rewrite /rotation -chunk_model_app length_drop.
+      replace (Z.of_nat (length vs - (sz - ₊(i `mod` Z.of_nat sz))))%Z
+        with (i `mod` Z.of_nat sz)%Z.
+      2: { rewrite Hvs. rewrite Nat2Z.inj_sub; first lia. lia. }
+      rewrite Z.add_0_l. apply bi.sep_comm.
+    Qed.
 
     Lemma chunk_cslice_rotation_right {l sz i1 dq vs} i2 n :
       0 < sz →
@@ -968,7 +997,19 @@ Section zoo_G.
       chunk_cslice l sz i (DfracOwn 1) vs ⊢
       ⌜length vs ≤ sz⌝.
     Proof.
-    Admitted.
+      rewrite Nat.le_ngt.
+      iIntros "%Hsz Hcslice %Hvs".
+      destruct vs as [| v1 vs]; simpl in Hvs; first lia.
+      iDestruct (chunk_cslice_cons with "Hcslice") as "(H↦1 & Hcslice)".
+      destruct (lookup_lt_is_Some_2 vs (sz - 1)) as (v2 & Hlookup2); first lia.
+      iDestruct (chunk_cslice_lookup with "Hcslice") as "H↦2"; first done.
+      assert (Heq : ((i + 1 + Z.of_nat (sz - 1)) `mod` Z.of_nat sz)%Z = (i `mod` Z.of_nat sz)%Z).
+      { transitivity ((i + Z.of_nat sz) `mod` Z.of_nat sz)%Z.
+        - f_equal. rewrite Nat2Z.inj_sub; first lia. lia.
+        - rewrite -{1}(Z.mul_1_l (Z.of_nat sz)) Z.mod_add //. lia. }
+      rewrite Heq.
+      iApply (pointsto_exclusive with "H↦1 H↦2").
+    Qed.
   End chunk_cslice.
 
   Section itype_chunk.
@@ -1005,7 +1046,19 @@ Section zoo_G.
       itype_chunk τ sz l ⊢
       itype_chunk τ sz' l.
     Proof.
-    Admitted.
+      iIntros "%Hsz #Hl".
+      iApply (inv_alter with "Hl"). iIntros "!> !> (%vs & %Hvs & Hmodel & Hvs)".
+      rewrite -(take_drop sz' vs).
+      iDestruct (chunk_model_app_2 with "Hmodel") as "(Hmodel1 & Hmodel2)"; first done.
+      iDestruct (big_sepL_app with "Hvs") as "(Hvs1 & Hvs2)".
+      iSplitL "Hmodel1 Hvs1".
+      - iExists (take sz' vs). simpl_length. iSteps.
+      - iIntros "(%vs1 & %Hvs1 & Hmodel1 & Hvs1)".
+        assert (Hlen : length (take sz' vs) = length vs1) by (rewrite length_take; lia).
+        iEval (rewrite Hlen) in "Hmodel2".
+        iDestruct (chunk_model_app_1 with "Hmodel1 Hmodel2") as "Hmodel".
+        iExists (vs1 ++ drop sz' vs). simpl_length. iFrameSteps.
+    Qed.
   End itype_chunk.
 End zoo_G.
 
