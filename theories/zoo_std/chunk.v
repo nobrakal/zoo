@@ -225,41 +225,6 @@ Section zoo_G.
       done.
     Qed.
 
-    Lemma chunk_model_update' {l i dq vs} (j : Z) k v :
-      (i ≤ j)%Z →
-      vs !! k = Some v →
-      k = ₊(j - i) →
-      chunk_model l i dq vs ⊢
-        l ↦[j]{dq} v ∗
-        ( ∀ w,
-          l ↦[j]{dq} w -∗
-          chunk_model l i dq (<[k := w]> vs)
-        ).
-    Proof.
-      apply chunk_model_update.
-    Qed.
-    Lemma chunk_model_lookup_acc' {l i dq vs} (j : Z) k v :
-      (i ≤ j)%Z →
-      vs !! k = Some v →
-      k = ₊(j - i) →
-      chunk_model l i dq vs ⊢
-        l ↦[j]{dq} v ∗
-        ( l ↦[j]{dq} v -∗
-          chunk_model l i dq vs
-        ).
-    Proof.
-      apply chunk_model_lookup_acc.
-    Qed.
-    Lemma chunk_model_lookup' {l i dq vs} (j : Z) k v :
-      (i ≤ j)%Z →
-      vs !! k = Some v →
-      k = ₊(j - i) →
-      chunk_model l i dq vs ⊢
-      l ↦[j]{dq} v.
-    Proof.
-      apply chunk_model_lookup.
-    Qed.
-
     Lemma chunk_model_valid l i dq vs :
       0 < length vs →
       chunk_model l i dq vs ⊢
@@ -817,47 +782,6 @@ Section zoo_G.
       l ↦[(i + k) `mod` sz]{dq} v.
     Proof.
       apply: big_sepL_lookup.
-    Qed.
-
-    Lemma chunk_cslice_update' {l sz i dq vs} (j : Z) k v :
-      (i ≤ j)%Z →
-      vs !! k = Some v →
-      k = ₊(j - i) →
-      chunk_cslice l sz i dq vs ⊢
-        l ↦[j `mod` sz]{dq} v ∗
-        ( ∀ w,
-          l ↦[j `mod` sz]{dq} w -∗
-          chunk_cslice l sz i dq (<[k := w]> vs)
-        ).
-    Proof.
-      intros Hij Hlookup ->.
-      rewrite {1}(chunk_cslice_update _ _ Hlookup).
-      replace ((i + Z.of_nat ₊ (j - i))%Z) with j by lia. done.
-    Qed.
-    Lemma chunk_cslice_lookup_acc' {l sz i dq vs} (j : Z) k v :
-      (i ≤ j)%Z →
-      vs !! k = Some v →
-      k = ₊(j - i) →
-      chunk_cslice l sz i dq vs ⊢
-        l ↦[j `mod` sz]{dq} v ∗
-        ( l ↦[j `mod` sz]{dq} v -∗
-          chunk_cslice l sz i dq vs
-        ).
-    Proof.
-      intros Hij Hlookup ->.
-      rewrite {1}(chunk_cslice_lookup_acc _ _ Hlookup).
-      replace ((i + Z.of_nat ₊ (j - i))%Z) with j by lia. done.
-    Qed.
-    Lemma chunk_cslice_lookup' {l sz i dq vs} (j : Z) k v :
-      (i ≤ j)%Z →
-      vs !! k = Some v →
-      k = ₊(j - i) →
-      chunk_cslice l sz i dq vs ⊢
-      l ↦[j `mod` sz]{dq} v.
-    Proof.
-      intros Hij Hlookup ->.
-      rewrite {1}(chunk_cslice_lookup _ _ Hlookup).
-      replace ((i + Z.of_nat ₊ (j - i))%Z) with j by lia. done.
     Qed.
 
     Lemma chunk_cslice_shift l sz i dq vs :

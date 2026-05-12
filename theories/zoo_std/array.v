@@ -1359,7 +1359,7 @@ Section zoo_G.
     iIntros "%Φ _ HΦ".
     wp_rec credit:"H£". wp_pures.
     iMod "HΦ" as "(%dq & %vs & %i & %v & (%Hi & %Hlookup & (%l & -> & Hmodel)) & _ & HΦ)".
-    iDestruct (chunk_model_lookup_acc' j with "Hmodel") as "(H↦ & Hmodel)"; [lia | done | lia |].
+    iDestruct (chunk_model_lookup_acc j with "Hmodel") as "(H↦ & Hmodel)"; [lia | done | lia |].
     wp_load.
     iApply ("HΦ" with "[H↦ Hmodel] H£").
     iSteps.
@@ -1654,7 +1654,7 @@ Section zoo_G.
     wp_rec credit:"H£". wp_pures.
     iMod "HΦ" as "(%vs & %i & (%Hj & (%l & -> & Hmodel)) & _ & HΦ)".
     destruct (lookup_lt_is_Some_2 vs (₊j - i)) as (w & Hlookup); first lia.
-    iDestruct (chunk_model_update' j with "Hmodel") as "(H↦ & Hmodel)"; [lia | | done |].
+    iDestruct (chunk_model_update j with "Hmodel") as "(H↦ & Hmodel)"; [lia | | done |].
     { assert (₊(j - i) = ₊j - i) as -> by lia. done. }
     wp_store.
     iApply ("HΦ" with "[H↦ Hmodel] H£").
@@ -1939,7 +1939,7 @@ Section zoo_G.
     wp_rec credit:"H£". wp_pures.
     iMod "HΦ" as "(%vs & %i & (%Hj & (%l & -> & Hmodel)) & _ & HΦ)".
     destruct (lookup_lt_is_Some_2 vs (₊j - i)) as (w & Hlookup); first lia.
-    iDestruct (chunk_model_update' j with "Hmodel") as "(H↦ & Hmodel)"; [lia | | done |].
+    iDestruct (chunk_model_update j with "Hmodel") as "(H↦ & Hmodel)"; [lia | | done |].
     { assert (₊(j - i) = ₊j - i) as -> by lia. done. }
     wp_xchg.
     iApply ("HΦ" with "[H↦ Hmodel] H£").
@@ -2089,7 +2089,7 @@ Section zoo_G.
     wp_rec credit:"H£". wp_pures.
     iMod "HΦ" as "(%vs & %i & (%Hj & (%l & -> & Hmodel)) & _ & HΦ)".
     destruct (lookup_lt_is_Some_2 vs (₊j - i)) as (v & Hlookup); first lia.
-    iDestruct (chunk_model_update' j with "Hmodel") as "(H↦ & Hmodel)"; [lia | | done |].
+    iDestruct (chunk_model_update j with "Hmodel") as "(H↦ & Hmodel)"; [lia | | done |].
     { assert (₊(j - i) = ₊j - i) as -> by lia. done. }
     wp_cas.
     all: iApply ("HΦ" with "[H↦ Hmodel] H£").
@@ -6818,7 +6818,9 @@ Section zoo_G.
     iDestruct (array_inv_cslice_agree with "Hinv Hcslice") as %<-.
     rewrite /array_cslice.
     iDestruct "Hcslice" as "(%l & -> & #Hheader & Hcslice)".
-    iDestruct (chunk_cslice_lookup_acc' j with "Hcslice") as "(H↦ & Hcslice)"; [done | done | lia |].
+    iDestruct (chunk_cslice_lookup_acc (₊j - i) with "Hcslice") as "(H↦ & Hcslice)"; first done.
+    iEval (replace (Z.of_nat i + Z.of_nat (₊j - i))%Z with j by lia) in "H↦".
+    iEval (replace (Z.of_nat i + Z.of_nat (₊j - i))%Z with j by lia) in "Hcslice".
     rewrite Z_rem_mod; [lia.. |].
     wp_load.
     iApply ("HΦ" with "[H↦ Hcslice] H£").
@@ -7116,7 +7118,9 @@ Section zoo_G.
     rewrite /array_cslice.
     iDestruct "Hcslice" as "(%l & -> & #Hheader & Hcslice)".
     destruct (lookup_lt_is_Some_2 vs (₊j - i)) as (v_old & Hlookup); first lia.
-    iDestruct (chunk_cslice_update' j (₊j - i) v_old with "Hcslice") as "(H↦ & Hcslice)"; [lia | done | lia |].
+    iDestruct (chunk_cslice_update (₊j - i) v_old with "Hcslice") as "(H↦ & Hcslice)"; first done.
+    iEval (replace (Z.of_nat i + Z.of_nat (₊j - i))%Z with j by lia) in "H↦".
+    iEval (replace (Z.of_nat i + Z.of_nat (₊j - i))%Z with j by lia) in "Hcslice".
     rewrite Z_rem_mod; [lia.. |].
     wp_store.
     iApply ("HΦ" with "[H↦ Hcslice] H£").
