@@ -686,11 +686,13 @@ Section zoo_G.
       rewrite /array_cslice. iSplit.
       - iIntros "((%l & -> & #Hheader & Hcs1) & (%l' & %Heq & _ & Hcs2))".
         injection Heq as <-.
-        iExists l. iFrame "#". iSplit; first done.
-        iApply chunk_cslice_app. iFrame.
+        rewrite Nat2Z.inj_add.
+        iDestruct (chunk_cslice_app_1 with "Hcs1 Hcs2") as "Hcs"; first done.
+        iExists l. iFrame "#". iFrame. done.
       - iIntros "(%l & -> & #Hheader & Hcs)".
         iDestruct (chunk_cslice_app with "Hcs") as "(Hcs1 & Hcs2)".
-        iSplitL "Hcs1"; iExists l; iFrame "#"; iSteps.
+        rewrite -Nat2Z.inj_add.
+        iSplitL "Hcs1"; iExists l; iFrame "#"; iFrame; done.
     Qed.
     Lemma array_cslice_app_1 t sz dq i1 vs1 i2 vs2 :
       i2 = i1 + length vs1 →
@@ -790,11 +792,18 @@ Section zoo_G.
           array_cslice t sz i dq (<[j := w]> vs)
         ).
     Proof.
-      intros.
+      intros Hj.
       rewrite /array_cslice.
-      setoid_rewrite <- chunk_cslice_singleton.
-      setoid_rewrite chunk_cslice_update at 1; last done.
-      iSteps.
+      iIntros "(%l & -> & #Hheader & Hcs)".
+      iDestruct (chunk_cslice_update j with "Hcs") as "(H↦ & Hcs)"; first done.
+      iSplitL "H↦".
+      { iExists l. iFrame "#". iSplit; first done.
+        iApply chunk_cslice_singleton_1.
+        rewrite Nat2Z.inj_add. done. }
+      iIntros (w) "(%l' & %Heq & _ & Hw)". injection Heq as <-.
+      iDestruct (chunk_cslice_singleton_2 with "Hw") as "Hw".
+      iEval (rewrite Nat2Z.inj_add) in "Hw".
+      iExists l. iFrame "#". iSplit; first done. iApply ("Hcs" with "Hw").
     Qed.
     Lemma array_cslice_lookup_acc {t sz i dq vs} j v :
       vs !! j = Some v →
@@ -820,9 +829,15 @@ Section zoo_G.
       array_cslice t sz i dq vs ⊣⊢
       array_cslice t sz (i + sz) dq vs.
     Proof.
-      rewrite /array_cslice.
-      setoid_rewrite chunk_cslice_shift at 1.
-      done.
+      rewrite /array_cslice. iSplit.
+      - iIntros "(%l & -> & #Hheader & Hcs)".
+        iEval (rewrite chunk_cslice_shift) in "Hcs".
+        iExists l. iFrame "#". iSplit; first done.
+        rewrite Nat2Z.inj_add. iFrame.
+      - iIntros "(%l & -> & #Hheader & Hcs)".
+        iEval (rewrite Nat2Z.inj_add) in "Hcs".
+        iEval (rewrite -chunk_cslice_shift) in "Hcs".
+        iExists l. iFrame "#". iSplit; first done. iFrame.
     Qed.
 
     Lemma array_cslice_shift_right t sz i dq vs :
@@ -865,9 +880,13 @@ Section zoo_G.
       array_cslice t sz i dq vs ⊣⊢
       array_cslice t sz (i + n) dq (rotation (n `mod` sz) vs).
     Proof.
-      intros.
+      intros Hsz Hvs.
       rewrite /array_cslice.
-      setoid_rewrite chunk_cslice_rotation_right at 1; done.
+      setoid_rewrite (chunk_cslice_rotation_right n) at 1; [| done..].
+      setoid_rewrite Nat2Z.inj_add at 1.
+      setoid_rewrite <- Nat2Z.inj_mod.
+      setoid_rewrite Nat2Z.id.
+      done.
     Qed.
     Lemma array_cslice_rotation_right_1 {t sz i dq vs} n :
       0 < sz →
@@ -959,9 +978,13 @@ Section zoo_G.
       array_cslice t sz (i + n) dq vs ⊣⊢
       array_cslice t sz i dq (rotation (sz - n `mod` sz) vs).
     Proof.
-      intros.
+      intros Hsz Hvs.
       rewrite /array_cslice.
-      setoid_rewrite chunk_cslice_rotation_left at 1; done.
+      setoid_rewrite Nat2Z.inj_add at 1.
+      setoid_rewrite (chunk_cslice_rotation_left _ _ _ n) at 1; [| done..].
+      setoid_rewrite <- Nat2Z.inj_mod.
+      setoid_rewrite Nat2Z.id.
+      done.
     Qed.
     Lemma array_cslice_rotation_left_1 t sz i n dq vs :
       0 < sz →
@@ -1632,10 +1655,10 @@ Section zoo_G.
     iMod "HΦ" as "(%vs & %i & (%Hj & (%l & -> & Hmodel)) & _ & HΦ)".
     destruct (lookup_lt_is_Some_2 vs (₊j - i)) as (w & Hlookup); first lia.
     iDestruct (chunk_model_update' j with "Hmodel") as "(H↦ & Hmodel)"; [lia | | done |].
-    { rewrite Nat2Z.id //. }
+    { assert (₊(j - i) = ₊j - i) as -> by lia. done. }
     wp_store.
     iApply ("HΦ" with "[H↦ Hmodel] H£").
-    rewrite Nat2Z.id. iSteps.
+    assert (₊(j - i) = ₊j - i) as -> by lia. iSteps.
   Qed.
   Lemma array٠unsafe_set𑁒spec_atomic_cell t (i : Z) v :
     <<<
@@ -1917,10 +1940,10 @@ Section zoo_G.
     iMod "HΦ" as "(%vs & %i & (%Hj & (%l & -> & Hmodel)) & _ & HΦ)".
     destruct (lookup_lt_is_Some_2 vs (₊j - i)) as (w & Hlookup); first lia.
     iDestruct (chunk_model_update' j with "Hmodel") as "(H↦ & Hmodel)"; [lia | | done |].
-    { rewrite Nat2Z.id //. }
+    { assert (₊(j - i) = ₊j - i) as -> by lia. done. }
     wp_xchg.
     iApply ("HΦ" with "[H↦ Hmodel] H£").
-    rewrite Nat2Z.id. iSteps.
+    assert (₊(j - i) = ₊j - i) as -> by lia. iSteps.
   Qed.
   Lemma array٠unsafe_xchg𑁒spec_atomic_cell t (i : Z) v :
     <<<
@@ -2067,10 +2090,10 @@ Section zoo_G.
     iMod "HΦ" as "(%vs & %i & (%Hj & (%l & -> & Hmodel)) & _ & HΦ)".
     destruct (lookup_lt_is_Some_2 vs (₊j - i)) as (v & Hlookup); first lia.
     iDestruct (chunk_model_update' j with "Hmodel") as "(H↦ & Hmodel)"; [lia | | done |].
-    { rewrite Nat2Z.id //. }
+    { assert (₊(j - i) = ₊j - i) as -> by lia. done. }
     wp_cas.
     all: iApply ("HΦ" with "[H↦ Hmodel] H£").
-    all: rewrite Nat2Z.id; iSteps.
+    all: assert (₊(j - i) = ₊j - i) as -> by lia; iSteps.
     iDestruct ("Hmodel" with "H↦") as "Hmodel".
     rewrite list_insert_id //.
   Qed.
@@ -6795,7 +6818,7 @@ Section zoo_G.
     iDestruct (array_inv_cslice_agree with "Hinv Hcslice") as %<-.
     rewrite /array_cslice.
     iDestruct "Hcslice" as "(%l & -> & #Hheader & Hcslice)".
-    iDestruct (chunk_cslice_lookup_acc' j with "Hcslice") as "(H↦ & Hcslice)"; [done.. |].
+    iDestruct (chunk_cslice_lookup_acc' j with "Hcslice") as "(H↦ & Hcslice)"; [done | done | lia |].
     rewrite Z_rem_mod; [lia.. |].
     wp_load.
     iApply ("HΦ" with "[H↦ Hcslice] H£").
@@ -7092,8 +7115,8 @@ Section zoo_G.
     iDestruct (array_inv_cslice_agree with "Hinv Hcslice") as %<-.
     rewrite /array_cslice.
     iDestruct "Hcslice" as "(%l & -> & #Hheader & Hcslice)".
-    iDestruct (chunk_cslice_update' j with "Hcslice") as "(H↦ & Hcslice)"; [lia | | done |].
-    { destruct (nth_lookup_or_length vs (₊j - i) inhabitant); [done | lia]. }
+    destruct (lookup_lt_is_Some_2 vs (₊j - i)) as (v_old & Hlookup); first lia.
+    iDestruct (chunk_cslice_update' j (₊j - i) v_old with "Hcslice") as "(H↦ & Hcslice)"; [lia | done | lia |].
     rewrite Z_rem_mod; [lia.. |].
     wp_store.
     iApply ("HΦ" with "[H↦ Hcslice] H£").
@@ -8160,7 +8183,7 @@ Section zoo_G.
       opose proof* (list_lookup_lookup_total_lt vs i); first lia.
       iDestruct (chunk_model_lookup_acc i with "Hmodel") as "(H↦ & Hmodel)"; [lia | done | lia |].
       iDestruct (big_sepL_lookup with "Hvs") as "Hv"; first done.
-      rewrite /array_slice chunk_model_singleton.
+      rewrite /array_slice chunk_model_singleton'.
       iAaccIntro with "[$H↦]"; iSteps.
   Qed.
 
@@ -8215,7 +8238,7 @@ Section zoo_G.
       opose proof* (list_lookup_lookup_total_lt vs i); first lia.
       iDestruct (chunk_model_lookup_acc i with "Hmodel") as "(H↦ & Hmodel)"; [lia | done | lia |].
       iDestruct (big_sepL_lookup with "Hvs") as "Hv"; first done.
-      rewrite /array_slice chunk_model_singleton.
+      rewrite /array_slice chunk_model_singleton'.
       iAaccIntro with "[$H↦]"; iSteps.
   Qed.
 

@@ -58,6 +58,12 @@ Section zoo_G.
     Proof.
       rewrite /chunk_model big_sepL_singleton /=. done.
     Qed.
+    Lemma chunk_model_singleton' l i dq v :
+      l ↦[i]{dq} v ⊣⊢
+      chunk_model l i dq [v].
+    Proof.
+      rewrite /chunk_model big_sepL_singleton /= Z.add_0_r //.
+    Qed.
     Lemma chunk_model_singleton_1 l dq v :
       l ↦{dq} v ⊢
       chunk_model l 0 dq [v].
