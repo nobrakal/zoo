@@ -10,14 +10,20 @@ From zoo Require Import
 From zoo Require Import
   options.
 
+Notation casn := (  in_type "zoo_kcas.kcas_1.state" 0
+) (only parsing).
 Notation "'casn'" := (
   in_type "zoo_kcas.kcas_1.state" 0
 )(in custom zoo_field
 ).
+Notation before := (  in_type "zoo_kcas.kcas_1.state" 1
+) (only parsing).
 Notation "'before'" := (
   in_type "zoo_kcas.kcas_1.state" 1
 )(in custom zoo_field
 ).
+Notation after := (  in_type "zoo_kcas.kcas_1.state" 2
+) (only parsing).
 Notation "'after'" := (
   in_type "zoo_kcas.kcas_1.state" 2
 )(in custom zoo_field
@@ -32,10 +38,14 @@ Notation "'state'" := (
 )(in custom zoo_proj
 ).
 
+Notation status := (  in_type "zoo_kcas.kcas_1.casn" 0
+) (only parsing).
 Notation "'status'" := (
   in_type "zoo_kcas.kcas_1.casn" 0
 )(in custom zoo_field
 ).
+Notation proph := (  in_type "zoo_kcas.kcas_1.casn" 1
+) (only parsing).
 Notation "'proph'" := (
   in_type "zoo_kcas.kcas_1.casn" 1
 )(in custom zoo_field

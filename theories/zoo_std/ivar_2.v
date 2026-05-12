@@ -107,7 +107,7 @@ Module base.
 
     #[local] Definition inv_inner t γ Ψ Ξ : iProp Σ :=
       ∃ state,
-      t.[result] ↦ state ∗
+      t ↦[result] state ∗
       consumer_auth γ Ψ state ∗
       inv_state γ Ξ state.
     #[local] Instance : CustomIpat "inv_inner" :=
@@ -118,9 +118,9 @@ Module base.
         )
       ".
     Definition ivar_2_inv t γ Ψ Ξ : iProp Σ :=
-      t.[mutex] ↦□ γ.(ivar_2_name_mutex) ∗
+      t ↦[mutex]□ γ.(ivar_2_name_mutex) ∗
       mutex_inv γ.(ivar_2_name_mutex) True ∗
-      t.[condition] ↦□ γ.(ivar_2_name_condition) ∗
+      t ↦[condition]□ γ.(ivar_2_name_condition) ∗
       condition_inv γ.(ivar_2_name_condition) ∗
       inv nroot (inv_inner t γ Ψ Ξ).
     #[local] Instance : CustomIpat "inv" :=

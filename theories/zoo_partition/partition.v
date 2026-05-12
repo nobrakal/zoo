@@ -78,8 +78,8 @@ Section partition_G.
     mono_gset_elem γ elt.
 
   #[local] Definition element_model class descr elt : iProp Σ :=
-    elt.[class_] ↦ #class ∗
-    elt.[seen] ↦ false.
+    elt ↦[class_] #class ∗
+    elt ↦[seen] false.
   #[local] Instance : CustomIpat "element_model" :=
     " ( Helt{}_class{_{suff}}
       & Helt{}_seen{_{suff}}
@@ -93,11 +93,11 @@ Section partition_G.
     ⌜list.last prev_descr.(descriptor_elts) = Some prev⌝ ∗
     ⌜descrs !! descr.(descriptor_next) = Some next_descr⌝ ∗
     ⌜head next_descr.(descriptor_elts) = Some next⌝ ∗
-    class.[first] ↦ #first ∗
-    class.[last] ↦ #last ∗
-    class.[len] ↦ #(length descr.(descriptor_elts)) ∗
-    class.[split] ↦ #first ∗
-    class.[split_len] ↦ 0 ∗
+    class ↦[first] #first ∗
+    class ↦[last] #last ∗
+    class ↦[len] #(length descr.(descriptor_elts)) ∗
+    class ↦[split] #first ∗
+    class ↦[split_len] 0 ∗
     xdlchain #prev descr.(descriptor_elts) #next ∗
     [∗ list] elt ∈ descr.(descriptor_elts),
       element_model class descr elt.
@@ -145,7 +145,7 @@ Section partition_G.
 
   Definition partition_element γ elt v : iProp Σ :=
     elements_elem γ elt ∗
-    elt.[data] ↦□ v.
+    elt ↦[data]□ v.
   #[local] Instance : CustomIpat "element" :=
     " ( Helts_elem{}{_{suff}}
       & Helt{}_data{_{suff}}
@@ -316,11 +316,11 @@ Section partition_G.
     {{{
       elt
     , RET #elt;
-      elt.[prev] ↦ #elt ∗
-      elt.[next] ↦ #elt ∗
-      elt.[data] ↦□ v ∗
-      elt.[class_] ↦ v_class ∗
-      elt.[seen] ↦ false
+      elt ↦[prev] #elt ∗
+      elt ↦[next] #elt ∗
+      elt ↦[data]□ v ∗
+      elt ↦[class_] v_class ∗
+      elt ↦[seen] false
     }}}.
   Proof.
     iSteps.

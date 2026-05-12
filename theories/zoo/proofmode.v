@@ -407,14 +407,14 @@ Section zoo_G.
 
   Lemma tac_wp_load Δ1 Δ2 id p K l fld dq v tid E Φ :
     MaybeIntoLaterNEnvs 1 Δ1 Δ2 →
-    envs_lookup id Δ2 = Some (p, (l +ₗ fld) ↦{dq} v)%I →
+    envs_lookup id Δ2 = Some (p, l ↦[fld]{dq} v)%I →
     envs_entails Δ2 (WP fill K v ∷ tid @ E {{ Φ }}) →
     envs_entails Δ1 (WP fill K (Load #l #fld) ∷ tid @ E {{ Φ }}).
   Proof.
     rewrite envs_entails_unseal => HΔ1 Hlookup HΔ2.
     rewrite into_laterN_env_sound -wp_bind' envs_lookup_split //= HΔ2.
     iIntros "(Hl & H)".
-    iAssert (▷ (□ (if p then (l +ₗ fld) ↦{dq} v else True) ∗ (l +ₗ fld) ↦{dq} v))%I with "[Hl]" as "(#Hl_ & Hl)".
+    iAssert (▷ (□ (if p then l ↦[fld]{dq} v else True) ∗ l ↦[fld]{dq} v))%I with "[Hl]" as "(#Hl_ & Hl)".
     { destruct p; iSteps. }
     iApply (wp_load with "Hl").
     iSteps. destruct p; iSteps.
@@ -422,10 +422,10 @@ Section zoo_G.
 
   Lemma tac_wp_store Δ1 Δ2 id K l fld v w tid E Φ :
     MaybeIntoLaterNEnvs 1 Δ1 Δ2 →
-    envs_lookup id Δ2 = Some (false, (l +ₗ fld) ↦ w)%I →
+    envs_lookup id Δ2 = Some (false, l ↦[fld] w)%I →
     ( let* Δ3 :=
         envs_simple_replace id false (Esnoc Enil
-          id ((l +ₗ fld) ↦ v))
+          id (l ↦[fld] v))
           Δ2
       in
       envs_entails Δ3 (WP fill K () ∷ tid @ E {{ Φ }})
@@ -442,10 +442,10 @@ Section zoo_G.
 
   Lemma tac_wp_xchg Δ1 Δ2 id K l fld v w tid E Φ :
     MaybeIntoLaterNEnvs 1 Δ1 Δ2 →
-    envs_lookup id Δ2 = Some (false, (l +ₗ fld) ↦ w)%I →
+    envs_lookup id Δ2 = Some (false, l ↦[fld] w)%I →
     ( let* Δ3 :=
         envs_simple_replace id false (Esnoc Enil
-          id ((l +ₗ fld) ↦ v)
+          id (l ↦[fld] v)
         ) Δ2
       in
       envs_entails Δ3 (WP fill K w ∷ tid @ E {{ Φ }})
@@ -462,7 +462,7 @@ Section zoo_G.
 
   Lemma tac_wp_cas Δ1 Δ2 Δ3 id p K l fld dq v v1 v2 tid E Φ :
     MaybeIntoLaterNEnvs 1 Δ1 Δ2 →
-    envs_lookup_delete true id Δ2 = Some (p, (l +ₗ fld) ↦{dq} v, Δ3)%I →
+    envs_lookup_delete true id Δ2 = Some (p, l ↦[fld]{dq} v, Δ3)%I →
     ( v ≉ v1 →
       envs_entails Δ2 (WP fill K false%V ∷ tid @ E {{ Φ }})
     ) →
@@ -471,7 +471,7 @@ Section zoo_G.
     ) →
     ( let* Δ4 :=
         envs_app false (Esnoc Enil
-          id ((l +ₗ fld) ↦ v2))
+          id (l ↦[fld] v2))
           Δ3
       in
       v ≈ v1 →
@@ -486,7 +486,7 @@ Section zoo_G.
     iAssert (▷ ⌜envs_wf Δ2⌝)%I as "#>%Hwf".
     { iDestruct (of_envs_alt with "HΔ2") as "($ & _)". }
     iDestruct (envs_lookup_sound with "HΔ2") as "(Hl & HΔ3)"; first done.
-    iAssert (▷ (□ (if p then (l +ₗ fld) ↦{dq} v else True) ∗ (l +ₗ fld) ↦{dq} v))%I with "[Hl]" as "(#Hl_ & Hl)".
+    iAssert (▷ (□ (if p then l ↦[fld]{dq} v else True) ∗ l ↦[fld]{dq} v))%I with "[Hl]" as "(#Hl_ & Hl)".
     { destruct p; iSteps. }
     iApply (wp_cas with "Hl"); [done.. |].
     iSplit.
@@ -504,10 +504,10 @@ Section zoo_G.
 
   Lemma tac_wp_faa Δ1 Δ2 id K l fld (i1 i2 : Z) tid E Φ :
     MaybeIntoLaterNEnvs 1 Δ1 Δ2 →
-    envs_lookup id Δ2 = Some (false, (l +ₗ fld) ↦ #i1)%I →
+    envs_lookup id Δ2 = Some (false, l ↦[fld] #i1)%I →
     ( let* Δ3 :=
         envs_simple_replace id false (Esnoc Enil
-          id ((l +ₗ fld) ↦ #(i1 + i2))
+          id (l ↦[fld] #(i1 + i2))
         ) Δ2
       in
       envs_entails Δ3 (WP fill K #i1 ∷ tid @ E {{ Φ }})
@@ -1031,7 +1031,7 @@ Ltac wp_load :=
     | fail 1 "wp_load: cannot find 'Load' in" e
     ];
     [ tc_solve
-    | let l := match goal with |- _ = Some (_, (pointsto ?l _ _)) => l end in
+    | let l := match goal with |- _ = Some (_, (pointsto ?l _ _ _)) => l end in
       first
       [ iAssumptionCore
       | fail 1 "wp_load: cannot find" l "↦ ?"
@@ -1050,7 +1050,7 @@ Ltac wp_store :=
     | fail 1 "wp_store: cannot find 'Store' in" e
     ];
     [ tc_solve
-    | let l := match goal with |- _ = Some (_, (pointsto ?l _ _)) => l end in
+    | let l := match goal with |- _ = Some (_, (pointsto ?l _ _ _)) => l end in
       first
       [ iAssumptionCore
       | fail 1 "wp_store: cannot find" l "↦ ?"
@@ -1070,7 +1070,7 @@ Ltac wp_xchg :=
     | fail 1 "wp_xchg: cannot find 'Xchg in" e
     ];
     [ tc_solve
-    | let l := match goal with |- _ = Some (_, (pointsto ?l _ _)) => l end in
+    | let l := match goal with |- _ = Some (_, (pointsto ?l _ _ _)) => l end in
       first
       [ iAssumptionCore
       | fail 1 "wp_xchg: cannot find" l "↦ ?"
@@ -1090,7 +1090,7 @@ Tactic Notation "wp_cas" "as" simple_intropattern(Hfail) "|" simple_intropattern
     | fail 1 "wp_cas: cannot find 'CAS' with literal arguments in" e
     ];
     [ tc_solve
-    | let l := match goal with |- _ = Some (_, (pointsto ?l _ _), _) => l end in
+    | let l := match goal with |- _ = Some (_, (pointsto ?l _ _ _), _) => l end in
       first
       [ iAssumptionCore
       | fail 1 "wp_cas: cannot find" l "↦ ?"
@@ -1119,7 +1119,7 @@ Ltac wp_faa :=
     | fail 1 "wp_faa: cannot find 'FAA' in" e
     ];
     [ tc_solve
-    | let l := match goal with |- _ = Some (_, (pointsto ?l _ _)) => l end in
+    | let l := match goal with |- _ = Some (_, (pointsto ?l _ _ _)) => l end in
       first
       [ iAssumptionCore
       | fail "wp_faa: cannot find" l "↦ ?"

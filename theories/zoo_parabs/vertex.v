@@ -139,7 +139,7 @@ Module base.
       output_frag' γ.(vertex_name_output).
 
     #[local] Definition model' t γ task state iter : iProp Σ :=
-      t.[task] ↦ task ∗
+      t ↦[task] task ∗
       state₁ γ Own state ∗
       iteration₁ γ iter.
     #[local] Instance : CustomIpat "model'" :=
@@ -322,7 +322,7 @@ Module base.
 
     #[local] Definition inv_inner inv t γ P R : iProp Σ :=
       ∃ preds state iter Π,
-      t.[preds] ↦ #preds ∗
+      t ↦[preds] #preds ∗
       state₂ γ state ∗
       iteration₂ γ iter ∗
       predecessors_auth γ Π ∗
@@ -348,7 +348,7 @@ Module base.
       location -d> vertex_name -d> iProp Σ -d> iProp Σ -d> iProp Σ
     :=
       λ inv t γ P R, (
-        t.[succs] ↦□ γ.(vertex_name_successors) ∗
+        t ↦[succs]□ γ.(vertex_name_successors) ∗
         mpmc_stack_2_inv γ.(vertex_name_successors) (nroot.@"successors") ∗
         invariants.inv (nroot.@"inv") (inv_inner inv t γ P R)
       )%I.

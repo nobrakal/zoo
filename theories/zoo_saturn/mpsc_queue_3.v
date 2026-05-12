@@ -93,7 +93,7 @@ Section mpsc_queue_3_G.
   #[local] Definition inv_inner l γ : iProp Σ :=
     ∃ front v_back,
     front₂ γ front ∗
-    l.[back] ↦ v_back ∗
+    l ↦[back] v_back ∗
     ( ( lstate_open₂ γ ∗
           ∃ back,
           ⌜v_back = list_to_clist_open back⌝ ∗
@@ -143,7 +143,7 @@ Section mpsc_queue_3_G.
     ∃ l γ v_front front,
     ⌜t = #l⌝ ∗
     l ↪ γ ∗
-    l.[front] ↦ v_front ∗
+    l ↦[front] v_front ∗
     front₁ γ front ∗
     match ws with
     | None =>

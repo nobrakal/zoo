@@ -87,7 +87,7 @@ Section semaphore_G.
 
   #[local] Definition inv_inner l γ P : iProp Σ :=
     ∃ cnt,
-    l.[count] ↦ #cnt ∗
+    l ↦[count] #cnt ∗
     [∗ list] _ ∈ seq 0 (S cnt),
       tokens_frag γ ∗
       P.
@@ -101,9 +101,9 @@ Section semaphore_G.
     ∃ l γ,
     ⌜t = #l⌝ ∗
     l ↪ γ ∗
-    l.[mutex] ↦□ γ.(metadata_mutex) ∗
+    l ↦[mutex]□ γ.(metadata_mutex) ∗
     mutex_inv γ.(metadata_mutex) (inv_inner l γ P) ∗
-    l.[condition] ↦□ γ.(metadata_condition) ∗
+    l ↦[condition]□ γ.(metadata_condition) ∗
     condition_inv γ.(metadata_condition) ∗
     tokens_auth γ cap.
   #[local] Instance : CustomIpat "inv" :=
@@ -316,7 +316,7 @@ Section semaphore_G.
       if b then
         ∃ cnt,
         ⌜0 < cnt⌝ ∗
-        l.[count] ↦ #cnt ∗
+        l ↦[count] #cnt ∗
         [∗ list] _ ∈ seq 0 (S cnt),
           tokens_frag γ ∗
           P

@@ -96,10 +96,10 @@ Module base.
       ∃ hist past front nodes back vs,
       ⌜hist = past ++ front :: nodes⌝ ∗
       ⌜back ∈ hist⌝ ∗
-      t.[front] ↦{#1/4} #front ∗
-      t.[back] ↦ #back ∗
+      t ↦[front]{#1/4} #front ∗
+      t ↦[back] #back ∗
       xtchain (Header §Node 2) (DfracOwn 1) hist §Null ∗
-      ([∗ list] node; v ∈ nodes; vs, node.[data] ↦ v) ∗
+      ([∗ list] node; v ∈ nodes; vs, node ↦[data] v) ∗
       history_auth γ hist ∗
       model₂ γ vs.
     #[local] Instance : CustomIpat "inv_inner" :=
@@ -137,7 +137,7 @@ Module base.
       ".
 
     #[local] Definition consumer_1 t front : iProp Σ :=
-      t.[front] ↦{#3/4} #front.
+      t ↦[front]{#3/4} #front.
     #[local] Definition consumer_2 t : iProp Σ :=
       ∃ front,
       consumer_1 t front.
@@ -606,8 +606,8 @@ Module base.
         inv' t γ ∗
         node_model γ node i ∗
         new_back ↦ₕ Header §Node 2 ∗
-        new_back.[next] ↦ §Null ∗
-        new_back.[data] ↦ v
+        new_back ↦[next] §Null ∗
+        new_back ↦[data] v
       | ∀∀ vs,
         mpsc_queue_1_model γ vs
       >>>

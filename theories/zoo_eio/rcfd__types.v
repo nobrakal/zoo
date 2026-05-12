@@ -19,10 +19,14 @@ Notation "'Closing'" := (
 )(in custom zoo_tag
 ).
 
+Notation ops := (  in_type "zoo_eio.rcfd.t" 0
+) (only parsing).
 Notation "'ops'" := (
   in_type "zoo_eio.rcfd.t" 0
 )(in custom zoo_field
 ).
+Notation state := (  in_type "zoo_eio.rcfd.t" 1
+) (only parsing).
 Notation "'state'" := (
   in_type "zoo_eio.rcfd.t" 1
 )(in custom zoo_field

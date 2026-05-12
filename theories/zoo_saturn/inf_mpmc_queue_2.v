@@ -443,8 +443,8 @@ Module base.
 
     #[local] Definition inv_inner t γ : iProp Σ :=
       ∃ front back hist slots vs lstates pasts prophss,
-      t.[front] ↦ #front ∗
-      t.[back] ↦ #back ∗
+      t ↦[front] #front ∗
+      t ↦[back] #back ∗
       inf_array_model γ.(inf_mpmc_queue_2_name_data) slots ∗
       model₂ γ vs ∗
       ⌜vs = oflatten (drop front hist)⌝ ∗
@@ -492,8 +492,8 @@ Module base.
       ".
     Definition inf_mpmc_queue_2_inv t γ ι : iProp Σ :=
       ⌜ι = γ.(inf_mpmc_queue_2_name_inv)⌝ ∗
-      t.[data] ↦□ γ.(inf_mpmc_queue_2_name_data) ∗
-      t.[proph] ↦□ #γ.(inf_mpmc_queue_2_name_prophet) ∗
+      t ↦[data]□ γ.(inf_mpmc_queue_2_name_data) ∗
+      t ↦[proph]□ #γ.(inf_mpmc_queue_2_name_prophet) ∗
       inf_array_inv γ.(inf_mpmc_queue_2_name_data) ∗
       inv γ.(inf_mpmc_queue_2_name_inv) (inv_inner t γ).
     #[local] Instance : CustomIpat "inv" :=

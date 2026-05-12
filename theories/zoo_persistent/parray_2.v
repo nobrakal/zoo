@@ -125,9 +125,9 @@ Section parray_2_G.
     ∃ l γ nodes root,
     ⌜t = #l⌝ ∗
     l ↪ γ ∗
-    l.[equal] ↦□ γ.(metadata_equal) ∗
-    l.[data] ↦□ γ.(metadata_data) ∗
-    l.[root] ↦ #root ∗
+    l ↦[equal]□ γ.(metadata_equal) ∗
+    l ↦[data]□ γ.(metadata_data) ∗
+    l ↦[root] #root ∗
     equal_model γ.(metadata_equal) ∗
     model' γ nodes root vs.
   #[local] Instance : CustomIpat "model" :=

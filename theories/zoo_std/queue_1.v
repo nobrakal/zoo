@@ -24,8 +24,8 @@ Section zoo_G.
   Definition queue_1_model t vs : iProp Σ :=
     ∃ l front back,
     ⌜t = #l⌝ ∗
-    l.[front] ↦ front ∗
-    l.[back] ↦ back ∗
+    l ↦[front] front ∗
+    l ↦[back] back ∗
     chain_model None front vs back ∗
     chain_model None back [()%V] ().
   #[local] Instance : CustomIpat "model" :=

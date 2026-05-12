@@ -143,10 +143,10 @@ Module base.
       ∃ hist past front nodes back vs waiters,
       ⌜hist = past ++ front :: nodes⌝ ∗
       ⌜back ∈ hist⌝ ∗
-      t.[front] ↦ #front ∗
-      t.[back] ↦ #back ∗
+      t ↦[front] #front ∗
+      t ↦[back] #back ∗
       xtchain (Header §Node 2) (DfracOwn 1) hist §Null ∗
-      ([∗ list] node; v ∈ nodes; vs, node.[data] ↦ v) ∗
+      ([∗ list] node; v ∈ nodes; vs, node ↦[data] v) ∗
       history_auth γ hist ∗
       front_auth γ (length past) ∗
       model₂ γ vs ∗
@@ -721,8 +721,8 @@ Module base.
         inv' t γ ∗
         node_model γ node i false ∗
         new_back ↦ₕ Header §Node 2 ∗
-        new_back.[next] ↦ §Null ∗
-        new_back.[data] ↦ v
+        new_back ↦[next] §Null ∗
+        new_back ↦[data] v
       | ∀∀ vs,
         mpmc_queue_1_model γ vs
       >>>

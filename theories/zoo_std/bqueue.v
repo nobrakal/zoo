@@ -26,10 +26,10 @@ Section zoo_G.
   Definition bqueue_model t (cap : nat) vs : iProp Σ :=
     ∃ l data front back extra,
     ⌜t = #l⌝ ∗
-    l.[capacity] ↦□ #cap ∗
-    l.[data] ↦□ data ∗
-    l.[front] ↦ #front ∗
-    l.[back] ↦ #back ∗
+    l ↦[capacity]□ #cap ∗
+    l ↦[data]□ data ∗
+    l ↦[front] #front ∗
+    l ↦[back] #back ∗
     array_cslice data cap front (DfracOwn 1) vs ∗
     array_cslice data cap back (DfracOwn 1) (replicate extra ()%V) ∗
     ⌜back = (front + length vs)%nat⌝ ∗

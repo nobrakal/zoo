@@ -26,8 +26,8 @@ Section zoo_G.
   #[local] Definition model' t vs extra : iProp Σ :=
     ∃ l data,
     ⌜t = #l⌝ ∗
-    l.[size] ↦ #(length vs) ∗
-    l.[data] ↦ data ∗
+    l ↦[size] #(length vs) ∗
+    l ↦[data] data ∗
     array_model data (DfracOwn 1) (vs ++ replicate extra ()%V).
   #[local] Instance : CustomIpat "model'" :=
     " ( %l{}

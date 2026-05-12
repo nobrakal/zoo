@@ -97,6 +97,11 @@ Section zoo_G₀.
     ghost_heap_auth γ_headers hdrs.
   #[local] Definition headers_at' γ_headers l hdr :=
     ghost_heap_at γ_headers l DfracDiscarded hdr.
+  #[global] Instance headers_at'_persistent γ_headers l hdr :
+    Persistent (headers_at' γ_headers l hdr).
+  Proof.
+    apply _.
+  Qed.
 
   #[local] Definition meta_token' γ_headers l E :=
     ghost_heap_meta_token γ_headers l E.
@@ -106,9 +111,13 @@ Section zoo_G₀.
   #[local] Lemma headers_alloc hdrs :
     ⊢ |==>
       ∃ γ_headers,
-      headers_auth' γ_headers hdrs.
+      headers_auth' γ_headers hdrs ∗
+      [∗ map] l ↦ hdr ∈ hdrs, headers_at' γ_headers l hdr.
   Proof.
-    iMod (ghost_heap_alloc hdrs) as "(%γ_headers & $ & _)" => //.
+    iMod (ghost_heap_alloc hdrs) as "(%γ_headers & $ & Hheaders & _)".
+    iApply big_sepM_bupd. iApply (big_sepM_impl with "Hheaders").
+    iIntros "!> %l %hdr %Hl Hl".
+    iApply (ghost_heap_at_persist with "Hl").
   Qed.
 End zoo_G₀.
 
@@ -260,12 +269,26 @@ Section cheriot_G.
 
   Definition heap_auth :=
     heap_auth' zoo_G_heap_name.
-  Definition pointsto :=
-    pointsto' zoo_G_heap_name.
+
+  Definition pointsto (l : location) (i : Z) (dq : dfrac) (v : val) : iProp Σ :=
+    ∃ hdr, l ↦ₕ hdr ∗ pointsto' zoo_G_heap_name (l +ₗ i) dq v.
 End cheriot_G.
 
+Notation "l '↦[' i ']' dq v" := (
+  pointsto l i dq v%V
+)(at level 20,
+  dq custom dfrac at level 1,
+  format "l  ↦[ i ] dq  v"
+) : bi_scope.
+Notation "l '↦[' i ']-'" := (
+  (∃ v, pointsto l i (DfracOwn 1) v)%I
+)(at level 20,
+  format "l  ↦[ i ]-"
+) : bi_scope.
+
+
 Notation "l ↦ dq v" := (
-  pointsto l dq v%V
+  pointsto l 0 dq v%V
 )(at level 20,
   dq custom dfrac at level 1,
   format "l  ↦ dq  v"
@@ -277,7 +300,7 @@ Notation "l ↦-" := (
 ) : bi_scope.
 
 Notation "l ↦∗ dq vs" :=
-  ([∗ list] i ↦ v ∈ vs, (l +ₗ i) ↦{dq} v)%I
+  ([∗ list] i ↦ v ∈ vs, pointsto l (Z.of_nat i) dq v)%I
 ( at level 20,
   dq custom dfrac at level 1,
   format "l  ↦∗ dq  vs"
@@ -289,7 +312,7 @@ Notation "l ↦∗-" :=
 ) : bi_scope.
 
 Notation "l ↦ᵣ dq v" := (
-  pointsto (location_add l (Z.of_nat (in_type "@ref" 0))) dq v%V
+  pointsto l (Z.of_nat (in_type "@ref" 0)) dq v%V
 )(at level 20,
   dq custom dfrac at level 1,
   format "l  ↦ᵣ dq  v"
@@ -303,144 +326,200 @@ Notation "l ↦ᵣ-" := (
 Section zoo_G.
   Context `{zoo_G : !ZooG Σ}.
 
-  #[global] Instance pointsto_timeless l dq v :
-    Timeless (l ↦{dq} v).
+  #[global] Instance pointsto_timeless l i dq v :
+    Timeless (l ↦[i]{dq} v).
   Proof.
     apply _.
   Qed.
 
-  #[global] Instance pointsto_persistent l v :
-    Persistent (l ↦□ v).
+  #[global] Instance pointsto_persistent l i v :
+    Persistent (l ↦[i]□ v).
   Proof.
     apply _.
   Qed.
 
-  #[global] Instance pointsto_fractional l v :
-    Fractional (λ q, l ↦{#q} v)%I.
+  #[global] Instance pointsto_fractional l i v :
+    Fractional (λ q, l ↦[i]{#q} v)%I.
   Proof.
-    apply _.
+    intros q1 q2. rewrite /pointsto. iSplit.
+    - iIntros "(%hdr & #Hhdr & Hl)".
+      iDestruct (fractional with "Hl") as "(Hl1 & Hl2)".
+      iSplitL "Hl1"; iExists hdr; iFrame "Hhdr"; iFrame.
+    - iIntros "((%hdr1 & #Hhdr1 & Hl1) & (%hdr2 & #Hhdr2 & Hl2))".
+      iDestruct (headers_at_agree with "Hhdr1 Hhdr2") as %->.
+      iExists hdr2. iFrame "Hhdr2".
+      iApply fractional. iFrame.
   Qed.
-  #[global] Instance pointsto_as_fractional l q v :
-    AsFractional (l ↦{#q} v) (λ q, l ↦{#q} v)%I q.
+  #[global] Instance pointsto_as_fractional l i q v :
+    AsFractional (pointsto l i (DfracOwn q) v) (λ q, pointsto l i (DfracOwn q) v)%I q.
   Proof.
-    apply _.
+    split; [done | apply _].
   Qed.
 
-  Lemma pointsto_valid l dq v :
-    l ↦{dq} v ⊢
+  Lemma pointsto_headers_at l i dq v :
+    pointsto l i dq v ⊢
+    ∃ hdr, l ↦ₕ hdr.
+  Proof.
+    iIntros "(%hdr & #Hhdr & _)". iExists hdr. iFrame "Hhdr".
+  Qed.
+
+  Lemma pointsto_valid l i dq v :
+    pointsto l i dq v ⊢
     ⌜✓ dq⌝.
   Proof.
-    apply bi.wand_entails', ghost_map_elem_valid.
+    iIntros "(% & _ & H)".
+    iApply (ghost_map_elem_valid with "H").
   Qed.
-  Lemma pointsto_combine l dq1 v1 dq2 v2 :
-    l ↦{dq1} v1 -∗
-    l ↦{dq2} v2 -∗
+  Lemma pointsto_combine l i dq1 v1 dq2 v2 :
+    pointsto l i dq1 v1 -∗
+    pointsto l i dq2 v2 -∗
       ⌜v1 = v2⌝ ∗
-      l ↦{dq1 ⋅ dq2} v1.
+      pointsto l i (dq1 ⋅ dq2) v1.
   Proof.
-    rewrite comm. apply ghost_map_elem_combine.
+    iIntros "(%hdr1 & #Hhdr1 & H1) (%hdr2 & #Hhdr2 & H2)".
+    iDestruct (ghost_map_elem_combine with "H1 H2") as "(H & ->)".
+    iSplit; first done. iExists hdr1. iFrame "Hhdr1 H".
   Qed.
-  Lemma pointsto_valid_2 l dq1 v1 dq2 v2 :
-    l ↦{dq1} v1 -∗
-    l ↦{dq2} v2 -∗
+  Lemma pointsto_valid_2 l i dq1 v1 dq2 v2 :
+    pointsto l i dq1 v1 -∗
+    pointsto l i dq2 v2 -∗
       ⌜✓ (dq1 ⋅ dq2)⌝ ∗
       ⌜v1 = v2⌝.
   Proof.
-    iIntros "H1 H2".
+    iIntros "(% & _ & H1) (% & _ & H2)".
     iDestruct (ghost_map_elem_valid_2 with "H1 H2") as "$".
   Qed.
-  Lemma pointsto_agree l dq2 v1 dq1 v2 :
-    l ↦{dq1} v1 -∗
-    l ↦{dq2} v2 -∗
+  Lemma pointsto_agree l i dq1 v1 dq2 v2 :
+    pointsto l i dq1 v1 -∗
+    pointsto l i dq2 v2 -∗
     ⌜v1 = v2⌝.
   Proof.
-    apply ghost_map_elem_agree.
+    iIntros "(% & _ & H1) (% & _ & H2)".
+    iApply (ghost_map_elem_agree with "H1 H2").
   Qed.
-  Lemma pointsto_dfrac_ne l1 dq1 v1 l2 dq2 v2 :
+  Lemma pointsto_dfrac_ne l1 i1 dq1 v1 l2 i2 dq2 v2 :
     ¬ ✓ (dq1 ⋅ dq2) →
-    l1 ↦{dq1} v1 -∗
-    l2 ↦{dq2} v2 -∗
-    ⌜l1 ≠ l2⌝.
+    pointsto l1 i1 dq1 v1 -∗
+    pointsto l2 i2 dq2 v2 -∗
+    ⌜l1 +ₗ i1 ≠ l2 +ₗ i2⌝.
   Proof.
-    apply ghost_map_elem_frac_ne.
+    iIntros "% (% & _ & H1) (% & _ & H2)".
+    iApply (ghost_map_elem_frac_ne with "H1 H2"); done.
   Qed.
-  Lemma pointsto_ne l1 v1 l2 dq2 v2 :
-    l1 ↦ v1 -∗
-    l2 ↦{dq2} v2 -∗
-    ⌜l1 ≠ l2⌝.
+  Lemma pointsto_ne l1 i1 v1 l2 i2 dq2 v2 :
+    pointsto l1 i1 (DfracOwn 1) v1 -∗
+    pointsto l2 i2 dq2 v2 -∗
+    ⌜l1 +ₗ i1 ≠ l2 +ₗ i2⌝.
   Proof.
-    apply ghost_map_elem_ne.
+    iIntros "(% & _ & H1) (% & _ & H2)".
+    iApply (ghost_map_elem_ne with "H1 H2").
   Qed.
-  Lemma pointsto_exclusive l v1 dq2 v2 :
-    l ↦ v1 -∗
-    l ↦{dq2} v2 -∗
+  Lemma pointsto_exclusive l i v1 dq2 v2 :
+    pointsto l i (DfracOwn 1) v1 -∗
+    pointsto l i dq2 v2 -∗
     False.
   Proof.
     iIntros "H1 H2".
-    iDestruct (ghost_map_elem_ne with "H1 H2") as %?. done.
+    iDestruct (pointsto_ne with "H1 H2") as %?. done.
   Qed.
-  Lemma pointsto_persist l dq v :
-    l ↦{dq} v ⊢ |==>
-    l ↦□ v.
+  Lemma pointsto_persist l i dq v :
+    pointsto l i dq v ⊢ |==>
+    pointsto l i DfracDiscarded v.
   Proof.
-    apply bi.wand_entails', ghost_map_elem_persist.
+    iIntros "(%hdr & #Hhdr & H)".
+    iMod (ghost_map_elem_persist with "H") as "H".
+    iExists hdr. iFrame "Hhdr H". done.
   Qed.
 
-  #[global] Instance pointsto_combine_sep_gives l dq1 v1 dq2 v2 :
-    CombineSepGives (l ↦{dq1} v1) (l ↦{dq2} v2) ⌜✓ (dq1 ⋅ dq2) ∧ v1 = v2⌝
+  #[global] Instance pointsto_combine_sep_gives l i dq1 v1 dq2 v2 :
+    CombineSepGives (pointsto l i dq1 v1) (pointsto l i dq2 v2) ⌜✓ (dq1 ⋅ dq2) ∧ v1 = v2⌝
   | 30.
   Proof.
-    apply _.
+    rewrite /CombineSepGives. iIntros "(H1 & H2)".
+    iDestruct (pointsto_valid_2 with "H1 H2") as %(? & ?).
+    iIntros "!> !%". done.
   Qed.
-  #[global] Instance pointsto_combine_as l dq1 dq2 v1 v2 :
-    CombineSepAs (l ↦{dq1} v1) (l ↦{dq2} v2) (l ↦{dq1 ⋅ dq2} v1)
+  #[global] Instance pointsto_combine_as l i dq1 dq2 v1 v2 :
+    CombineSepAs (pointsto l i dq1 v1) (pointsto l i dq2 v2) (pointsto l i (dq1 ⋅ dq2) v1)
   | 60.
   Proof.
-    apply _.
+    rewrite /CombineSepAs. iIntros "(H1 & H2)".
+    iDestruct (pointsto_combine with "H1 H2") as "(_ & $)".
   Qed.
-  #[global] Instance frame_pointsto p l v q1 q2 q :
+  #[global] Instance frame_pointsto p l i v q1 q2 q :
     FrameFractionalQp q1 q2 q →
-    Frame p (l ↦{#q1} v) (l ↦{#q2} v) (l ↦{#q} v)
+    Frame p (pointsto l i (DfracOwn q1) v) (pointsto l i (DfracOwn q2) v) (pointsto l i (DfracOwn q) v)
   | 5.
   Proof.
     apply: frame_fractional.
   Qed.
 
-  Lemma heap_lookup h a dq c :
+  Lemma heap_lookup h l i dq v :
     heap_auth h -∗
-    a ↦{dq} c -∗
-    ⌜h !! a = Some c⌝.
+    l ↦[i]{dq} v -∗
+    ⌜h !! (l +ₗ i) = Some v⌝.
   Proof.
-    apply ghost_map_lookup.
+    iIntros "Hauth (% & _ & H)".
+    iApply (ghost_map_lookup with "Hauth H").
   Qed.
-  Lemma heap_insert {h1} h2 :
-    h2 ##ₘ h1 →
-    heap_auth h1 ⊢ |==>
-      heap_auth (h2 ∪ h1) ∗
-      [∗ map] l ↦ v ∈ h2, l ↦ v.
+  #[local] Lemma big_sepM_chunk_to_list {A} (Φ : location → A → iProp Σ) l xs :
+    ([∗ map] l ↦ x ∈ chunk l xs, Φ l x) ⊢
+    [∗ list] i ↦ x ∈ xs, Φ (l +ₗ Z.of_nat i) x.
   Proof.
-    intros.
-    apply bi.wand_entails', ghost_map_insert_big => //.
+    iInduction xs as [| x xs] "IH" forall (l) => /=. 1: iSteps.
+    iIntros "H".
+    rewrite big_sepM_insert.
+    { apply eq_None_ne_Some. intros y (k & Hk & Hl & _)%chunk_lookup.
+      rewrite location_add_assoc -{1}(location_add_0 l) in Hl.
+      apply (inj _) in Hl. lia. }
+    iDestruct "H" as "(H0 & Hrest)".
+    rewrite location_add_0. iFrame "H0".
+    iDestruct ("IH" with "Hrest") as "Hrest".
+    iApply (big_sepL_impl with "Hrest"). iIntros "!> %k %y %Hy H".
+    rewrite Nat2Z.inj_succ -Z.add_1_l location_add_assoc //.
   Qed.
-  Lemma heap_update {h a c1} c2 :
+
+  Lemma heap_insert {h1} l hdr vs :
+    ( ∀ i,
+      i < length vs →
+      h1 !! (l +ₗ i) = None
+    ) →
+    l ↦ₕ hdr -∗
+    heap_auth h1 ==∗
+      heap_auth (chunk l vs ∪ h1) ∗
+      l ↦∗ vs.
+  Proof.
+    iIntros "%Hfresh #Hhdr Hauth".
+    iMod (ghost_map_insert_big (chunk l vs) with "Hauth") as "(Hauth & Hl)".
+    { apply chunk_map_disjoint => //. }
+    iFrame "Hauth".
+    iDestruct (big_sepM_chunk_to_list (λ l' v, pointsto' zoo_G_heap_name l' (DfracOwn 1) v) with "Hl") as "Hl".
+    iModIntro.
+    iApply (big_sepL_impl with "Hl"). iIntros "!> %k %v %Hv H".
+    iExists hdr. iFrame "Hhdr H".
+  Qed.
+  Lemma heap_update {h l i v1} v2 :
     heap_auth h -∗
-    a ↦ c1 ==∗
-      heap_auth (<[a := c2]> h) ∗
-      a ↦ c2.
+    l ↦[i] v1 ==∗
+      heap_auth (<[l +ₗ i := v2]> h) ∗
+      l ↦[i] v2.
   Proof.
-    apply ghost_map_update.
+    iIntros "Hauth (%hdr & #Hhdr & H)".
+    iMod (ghost_map_update with "Hauth H") as "($ & H)".
+    iExists hdr. iFrame "Hhdr H". done.
   Qed.
 End zoo_G.
 
 #[global] Opaque heap_auth'.
 #[global] Opaque pointsto'.
+#[global] Opaque pointsto.
 
 Section zoo_G.
   Context `{zoo_G : !ZooG Σ}.
 
-  Lemma big_sepL2_pointsto_agree ls dq1 vs1 dq2 vs2 :
-    ([∗ list] l; v ∈ ls; vs1, l ↦{dq1} v) -∗
-    ([∗ list] l; v ∈ ls; vs2, l ↦{dq2} v) -∗
+  Lemma big_sepL2_pointsto_agree i ls dq1 vs1 dq2 vs2 :
+    ([∗ list] l; v ∈ ls; vs1, l ↦[i]{dq1} v) -∗
+    ([∗ list] l; v ∈ ls; vs2, l ↦[i]{dq2} v) -∗
     ⌜vs1 = vs2⌝.
   Proof.
     iIntros "H1 H2".
@@ -457,14 +536,13 @@ Section zoo_G.
     ([∗ list] l; v ∈ ls; vs2, l ↦ᵣ{dq2} v) -∗
     ⌜vs1 = vs2⌝.
   Proof.
-    setoid_rewrite location_add_0.
     apply big_sepL2_pointsto_agree.
   Qed.
 
-  Lemma big_sepL2_pointsto_prefix ls1 dq1 vs1 ls2 dq2 vs2 :
+  Lemma big_sepL2_pointsto_prefix i ls1 dq1 vs1 ls2 dq2 vs2 :
     ls1 `prefix_of` ls2 →
-    ([∗ list] l; v ∈ ls1; vs1, l ↦{dq1} v) -∗
-    ([∗ list] l; v ∈ ls2; vs2, l ↦{dq2} v) -∗
+    ([∗ list] l; v ∈ ls1; vs1, l ↦[i]{dq1} v) -∗
+    ([∗ list] l; v ∈ ls2; vs2, l ↦[i]{dq2} v) -∗
     ⌜vs1 `prefix_of` vs2⌝.
   Proof.
     iIntros ((ls & ->)) "H1 H2".
@@ -478,14 +556,13 @@ Section zoo_G.
     ([∗ list] l; v ∈ ls2; vs2, l ↦ᵣ{dq2} v) -∗
     ⌜vs1 `prefix_of` vs2⌝.
   Proof.
-    setoid_rewrite location_add_0.
     apply big_sepL2_pointsto_prefix.
   Qed.
 
-  Lemma big_sepL2_pointsto_suffix ls1 dq1 vs1 ls2 dq2 vs2 :
+  Lemma big_sepL2_pointsto_suffix i ls1 dq1 vs1 ls2 dq2 vs2 :
     ls1 `suffix_of` ls2 →
-    ([∗ list] l; v ∈ ls1; vs1, l ↦{dq1} v) -∗
-    ([∗ list] l; v ∈ ls2; vs2, l ↦{dq2} v) -∗
+    ([∗ list] l; v ∈ ls1; vs1, l ↦[i]{dq1} v) -∗
+    ([∗ list] l; v ∈ ls2; vs2, l ↦[i]{dq2} v) -∗
     ⌜vs1 `suffix_of` vs2⌝.
   Proof.
     iIntros ((ls & ->)) "H1 H2".
@@ -499,7 +576,6 @@ Section zoo_G.
     ([∗ list] l; v ∈ ls2; vs2, l ↦ᵣ{dq2} v) -∗
     ⌜vs1 `suffix_of` vs2⌝.
   Proof.
-    setoid_rewrite location_add_0.
     apply big_sepL2_pointsto_suffix.
   Qed.
 End zoo_G.
@@ -993,6 +1069,10 @@ End zoo_G.
 
 Lemma zoo_init `{zoo_Gpre : !ZooGpre Σ} `{inv_G : !invGS Σ} hdrs h pids vs κs :
   h !! zoo_counter = Some 0%V →
+  ( ∀ l,
+    is_Some (h !! l) →
+    is_Some (hdrs !! l)
+  ) →
   ⊢ |={⊤}=>
     ∃ zoo_G : ZooG Σ,
     ⌜zoo_G.(zoo_G_inv_G) = inv_G⌝ ∗
@@ -1005,13 +1085,11 @@ Lemma zoo_init `{zoo_Gpre : !ZooGpre Σ} `{inv_G : !invGS Σ} hdrs h pids vs κs
     ([∗ map] l ↦ v ∈ delete zoo_counter h, l ↦ v) ∗
     ([∗ list] tid ↦ v ∈ vs, tid ↦ₗ v).
 Proof.
-  intros Hh_lookup_zoo_counter.
+  intros Hh_lookup_zoo_counter Hdom.
 
-  iMod (headers_alloc hdrs) as "(%γ_headers & Hheaders_auth)".
+  iMod (headers_alloc hdrs) as "(%γ_headers & Hheaders_auth & Hheaders)".
 
   iMod (heap_alloc h) as "(%γ_heap & Hheap_auth & Hheap)".
-  iDestruct (big_sepM_delete with "Hheap") as "(Hcounter & Hheap)". 1: done.
-  iEval (rewrite -(location_add_0 zoo_counter)) in "Hcounter".
 
   iMod (prophets_alloc κs pids) as "(%γ_prophets & Hprophets_interp)".
 
@@ -1029,6 +1107,15 @@ Proof.
     ; zoo_G_locals_name := γ_locals
     ; zoo_G_counter_name := γ_counter
     |}.
+
+  iDestruct "Hheaders" as "#Hheaders".
+  iAssert ([∗ map] l ↦ v ∈ h, l ↦ v)%I with "[Hheap]" as "Hheap".
+  { iApply (big_sepM_impl with "Hheap"). iIntros "!> %l %v %Hl H".
+    destruct (Hdom l ltac:(eauto)) as [hdr Hhdr].
+    iDestruct (big_sepM_lookup with "Hheaders") as "Hhdr"; first done.
+    iExists hdr. iFrame "Hhdr". rewrite location_add_0. iFrame. }
+  iDestruct (big_sepM_delete with "Hheap") as "(Hcounter & Hheap)". 1: done.
+
   iExists zoo_G. iFrameSteps.
   iApply inv_alloc.
   iExists 0. iFrameSteps.

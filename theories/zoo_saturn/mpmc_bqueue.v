@@ -136,7 +136,7 @@ Module base.
 
     #[local] Definition node_model γ node (i : nat) b : iProp Σ :=
       node ↦ₕ Header §Node 4 ∗
-      node.[index] ↦□ #i ∗
+      node ↦[index]□ #i ∗
       history_at γ i node ∗
       if b then front_lb γ i else True%I.
     #[local] Instance : CustomIpat "node_model" :=
@@ -168,18 +168,18 @@ Module base.
       ∃ hist past front nodes back vs waiters,
       ⌜hist = past ++ front :: nodes⌝ ∗
       ⌜back ∈ hist⌝ ∗
-      t.[front] ↦ #front ∗
-      t.[back] ↦ #back ∗
+      t ↦[front] #front ∗
+      t ↦[back] #back ∗
       xtchain (Header §Node 4) (DfracOwn 1) hist §Null ∗
       ( [∗ list] node; v ∈ nodes; vs,
-        node.[data] ↦ v
+        node ↦[data] v
       ) ∗
       ( [∗ list] i ↦ node ∈ hist,
-        node.[index] ↦□ #i
+        node ↦[index]□ #i
       ) ∗
       ( [∗ list] i ↦ node ∈ hist,
         ∃ cap : nat,
-        node.[estimated_capacity] ↦ #cap ∗
+        node ↦[estimated_capacity] #cap ∗
         ⌜i + cap ≤ length past + γ.(mpmc_bqueue_name_capacity)⌝
       ) ∗
       history_auth γ hist ∗
@@ -217,7 +217,7 @@ Module base.
     Definition mpmc_bqueue_inv t γ ι cap : iProp Σ :=
       ⌜ι = γ.(mpmc_bqueue_name_inv)⌝ ∗
       ⌜cap = γ.(mpmc_bqueue_name_capacity)⌝ ∗
-      t.[capacity] ↦□ #cap ∗
+      t ↦[capacity]□ #cap ∗
       inv' t γ.
     #[local] Instance : CustomIpat "inv" :=
       " ( ->
@@ -1006,17 +1006,17 @@ Module base.
       ⊢ (
         ∀ back i_back i_front (cap : Z),
         <<<
-          t.[capacity] ↦□ #γ.(mpmc_bqueue_name_capacity) ∗
+          t ↦[capacity]□ #γ.(mpmc_bqueue_name_capacity) ∗
           inv' t γ ∗
           node_model γ back i_back false ∗
           front_lb γ i_front ∗
           ⌜0 ≤ cap⌝%Z ∗
           ⌜i_back + cap ≤ i_front + γ.(mpmc_bqueue_name_capacity)⌝%Z ∗
           new_back ↦ₕ Header §Node 4 ∗
-          new_back.[next] ↦ §Null ∗
-          new_back.[data] ↦ v ∗
-          new_back.[index] ↦- ∗
-          new_back.[estimated_capacity] ↦-
+          new_back ↦[next] §Null ∗
+          new_back ↦[data] v ∗
+          new_back ↦[index]- ∗
+          new_back ↦[estimated_capacity]-
         | ∀∀ vs,
           ⌜length vs ≤ γ.(mpmc_bqueue_name_capacity)⌝ ∗
           model₁ γ vs
@@ -1032,14 +1032,14 @@ Module base.
       ) ∧ (
         ∀ back i_back,
         <<<
-          t.[capacity] ↦□ #γ.(mpmc_bqueue_name_capacity) ∗
+          t ↦[capacity]□ #γ.(mpmc_bqueue_name_capacity) ∗
           inv' t γ ∗
           node_model γ back i_back false ∗
           new_back ↦ₕ Header §Node 4 ∗
-          new_back.[next] ↦ §Null ∗
-          new_back.[data] ↦ v ∗
-          new_back.[index] ↦- ∗
-          new_back.[estimated_capacity] ↦-
+          new_back ↦[next] §Null ∗
+          new_back ↦[data] v ∗
+          new_back ↦[index]- ∗
+          new_back ↦[estimated_capacity]-
         | ∀∀ vs,
           ⌜length vs ≤ γ.(mpmc_bqueue_name_capacity)⌝ ∗
           model₁ γ vs
@@ -1185,14 +1185,14 @@ Module base.
     Qed.
     #[local] Lemma mpmc_bqueue٠push_2𑁒spec t γ back i_back new_back v :
       <<<
-        t.[capacity] ↦□ #γ.(mpmc_bqueue_name_capacity) ∗
+        t ↦[capacity]□ #γ.(mpmc_bqueue_name_capacity) ∗
         inv' t γ ∗
         node_model γ back i_back false ∗
         new_back ↦ₕ Header §Node 4 ∗
-        new_back.[next] ↦ §Null ∗
-        new_back.[data] ↦ v ∗
-        new_back.[index] ↦- ∗
-        new_back.[estimated_capacity] ↦-
+        new_back ↦[next] §Null ∗
+        new_back ↦[data] v ∗
+        new_back ↦[index]- ∗
+        new_back ↦[estimated_capacity]-
       | ∀∀ vs,
         ⌜length vs ≤ γ.(mpmc_bqueue_name_capacity)⌝ ∗
         model₁ γ vs

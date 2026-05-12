@@ -9,14 +9,20 @@ From zoo_std Require Import
 From zoo Require Import
   options.
 
+Notation mutex := (  in_type "zoo_std.ivar_2.t" 0
+) (only parsing).
 Notation "'mutex'" := (
   in_type "zoo_std.ivar_2.t" 0
 )(in custom zoo_field
 ).
+Notation condition := (  in_type "zoo_std.ivar_2.t" 1
+) (only parsing).
 Notation "'condition'" := (
   in_type "zoo_std.ivar_2.t" 1
 )(in custom zoo_field
 ).
+Notation result := (  in_type "zoo_std.ivar_2.t" 2
+) (only parsing).
 Notation "'result'" := (
   in_type "zoo_std.ivar_2.t" 2
 )(in custom zoo_field

@@ -23,7 +23,7 @@ Section zoo_G.
   Definition deque_model t vs : iProp Σ :=
     ∃ nodes,
     xdeque_model t nodes ∗
-    [∗ list] node; v ∈ nodes; vs, node.[xdeque_data] ↦ v.
+    [∗ list] node; v ∈ nodes; vs, node ↦[xdeque_data] v.
 
   #[global] Instance deque_model_timeless t vs :
     Timeless (deque_model t vs).
@@ -187,7 +187,7 @@ Section zoo_G.
     wp_rec.
     pose (Χ (nodes_done : list location) := (
       Ψ (take (length nodes_done) vs) ∗
-      [∗ list] node; v ∈ nodes; vs, node.[xdeque_data] ↦ v
+      [∗ list] node; v ∈ nodes; vs, node ↦[xdeque_data] v
     )%I).
     wp_apply+ (xdeque٠iter𑁒spec Χ with "[$HΨ $Hnodes $Hmodel]").
     { iIntros "!> %nodes_done %node %nodes_todo -> (HΨ & Hnodes)".

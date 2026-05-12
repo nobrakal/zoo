@@ -55,7 +55,7 @@ Section zoo_G.
       l ↦{dq} v ⊣⊢
       chunk_model l dq [v].
     Proof.
-      setoid_rewrite big_sepL_singleton. rewrite location_add_0 //.
+      rewrite /chunk_model big_sepL_singleton //.
     Qed.
     Lemma chunk_model_singleton_1 l dq v :
       l ↦{dq} v ⊢

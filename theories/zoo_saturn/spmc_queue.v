@@ -160,9 +160,9 @@ Module base.
     #[local] Definition inv_inner t γ : iProp Σ :=
       ∃ hist past front nodes vs waiters,
       ⌜hist = past ++ front :: nodes⌝ ∗
-      t.[front] ↦ #front ∗
+      t ↦[front] #front ∗
       xtchain (Header §Node 2) (DfracOwn 1) hist §Null ∗
-      ([∗ list] node; v ∈ nodes; vs, node.[data] ↦ v) ∗
+      ([∗ list] node; v ∈ nodes; vs, node ↦[data] v) ∗
       history_auth γ hist ∗
       front_auth γ (length past) ∗
       model₂ γ vs ∗
@@ -199,7 +199,7 @@ Module base.
 
     Definition spmc_queue_producer t γ ws : iProp Σ :=
       ∃ back,
-      t.[back] ↦ #back ∗
+      t ↦[back] #back ∗
       back ↦ₕ Header §Node 2 ∗
       history_last γ back ∗
       producer γ ws.

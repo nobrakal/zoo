@@ -19,10 +19,14 @@ Notation "'Node'" := (
 )(in custom zoo_tag
 ).
 
+Notation next := (  in_type "zoo_saturn.bag_2.producers_.Node" 0
+) (only parsing).
 Notation "'next'" := (
   in_type "zoo_saturn.bag_2.producers_.Node" 0
 )(in custom zoo_field
 ).
+Notation queue := (  in_type "zoo_saturn.bag_2.producers_.Node" 1
+) (only parsing).
 Notation "'queue'" := (
   in_type "zoo_saturn.bag_2.producers_.Node" 1
 )(in custom zoo_field
@@ -37,11 +41,15 @@ Notation "'producer_node'" := (
 )(in custom zoo_proj
 ).
 
+Notation consumer_queue := (  in_type "zoo_saturn.bag_2.consumer" 0
+) (only parsing).
 Notation "'consumer_queue'" := (
   in_type "zoo_saturn.bag_2.consumer" 0
 )(in custom zoo_field
 ).
 
+Notation producers := (  in_type "zoo_saturn.bag_2.t" 0
+) (only parsing).
 Notation "'producers'" := (
   in_type "zoo_saturn.bag_2.t" 0
 )(in custom zoo_field

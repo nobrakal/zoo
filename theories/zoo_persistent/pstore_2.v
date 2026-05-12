@@ -145,12 +145,12 @@ Module base.
       ⌜t = #l⌝ ∗
       ⌜σ = snd <$> ς⌝ ∗
       l ↪[nroot.@"impl"] γ ∗
-      l.[gen] ↦ #g ∗
-      l.[root] ↦ #root ∗
+      l ↦[gen] #g ∗
+      l ↦[root] #root ∗
       root ↦ᵣ §Root ∗
       ( [∗ map] r ↦ data ∈ store_on σ₀ ς,
-        r.[ref_gen] ↦ #data.(gen) ∗
-        r.[ref_value] ↦ data.(val)
+        r ↦[ref_gen] #data.(gen) ∗
+        r ↦[ref_value] data.(val)
       ) ∗
       ⌜descriptor_wf σ₀ (Descriptor g ς)⌝ ∗
       if decide (g = 0) then
@@ -820,8 +820,8 @@ Module base.
     #[local] Definition collect_inv γ σ₀ root ς cnodes ϵs base descr δs : iProp Σ :=
       root ↦ᵣ §Root ∗
       ( [∗ map] r ↦ data ∈ store_on σ₀ ς,
-        r.[ref_gen] ↦ #data.(gen) ∗
-        r.[ref_value] ↦ data.(val)
+        r ↦[ref_gen] #data.(gen) ∗
+        r ↦[ref_value] data.(val)
       ) ∗
       ⌜treemap_rooted ϵs base⌝ ∗
       cnodes_auth γ cnodes ∗
@@ -1035,8 +1035,8 @@ Module base.
       ∃ v_root,
       root ↦ᵣ v_root ∗
       ( [∗ map] r ↦ data ∈ store_on σ₀ ς,
-        r.[ref_gen] ↦ #data.(gen) ∗
-        r.[ref_value] ↦ data.(val)
+        r ↦[ref_gen] #data.(gen) ∗
+        r ↦[ref_value] data.(val)
       ) ∗
       ⌜treemap_rooted ϵs base⌝ ∗
       cnodes_auth γ cnodes ∗
@@ -1053,8 +1053,8 @@ Module base.
       ∃ v_node,
       node ↦ᵣ v_node ∗
       ( [∗ map] r ↦ data ∈ store_on σ₀ ς,
-        r.[ref_gen] ↦ #data.(gen) ∗
-        r.[ref_value] ↦ data.(val)
+        r ↦[ref_gen] #data.(gen) ∗
+        r ↦[ref_value] data.(val)
       ) ∗
       ⌜treemap_rooted ϵs base⌝ ∗
       cnodes_auth γ cnodes ∗
@@ -1072,8 +1072,8 @@ Module base.
     #[local] Definition revert_post γ σ₀ cnodes ϵs base descr : iProp Σ :=
       base ↦ᵣ §Root ∗
       ( [∗ map] r ↦ data ∈ store_on σ₀ descr.(descriptor_store),
-        r.[ref_gen] ↦ #data.(gen) ∗
-        r.[ref_value] ↦ data.(val)
+        r ↦[ref_gen] #data.(gen) ∗
+        r ↦[ref_value] data.(val)
       ) ∗
       ⌜treemap_rooted ϵs base⌝ ∗
       cnodes_auth γ cnodes ∗

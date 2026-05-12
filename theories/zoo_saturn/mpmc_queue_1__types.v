@@ -17,19 +17,27 @@ Notation "'Node'" := (
 )(in custom zoo_tag
 ).
 
+Notation next := (  in_type "zoo_saturn.mpmc_queue_1.node.Node" 0
+) (only parsing).
 Notation "'next'" := (
   in_type "zoo_saturn.mpmc_queue_1.node.Node" 0
 )(in custom zoo_field
 ).
+Notation data := (  in_type "zoo_saturn.mpmc_queue_1.node.Node" 1
+) (only parsing).
 Notation "'data'" := (
   in_type "zoo_saturn.mpmc_queue_1.node.Node" 1
 )(in custom zoo_field
 ).
 
+Notation front := (  in_type "zoo_saturn.mpmc_queue_1.t" 0
+) (only parsing).
 Notation "'front'" := (
   in_type "zoo_saturn.mpmc_queue_1.t" 0
 )(in custom zoo_field
 ).
+Notation back := (  in_type "zoo_saturn.mpmc_queue_1.t" 1
+) (only parsing).
 Notation "'back'" := (
   in_type "zoo_saturn.mpmc_queue_1.t" 1
 )(in custom zoo_field

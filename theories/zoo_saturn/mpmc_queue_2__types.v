@@ -30,19 +30,27 @@ Notation "'Used'" := (
 )(in custom zoo_tag
 ).
 
+Notation index := (  in_type "zoo_saturn.mpmc_queue_2.prefix.Back" 0
+) (only parsing).
 Notation "'index'" := (
   in_type "zoo_saturn.mpmc_queue_2.prefix.Back" 0
 )(in custom zoo_field
 ).
+Notation move := (  in_type "zoo_saturn.mpmc_queue_2.prefix.Back" 1
+) (only parsing).
 Notation "'move'" := (
   in_type "zoo_saturn.mpmc_queue_2.prefix.Back" 1
 )(in custom zoo_field
 ).
 
+Notation front := (  in_type "zoo_saturn.mpmc_queue_2.t" 0
+) (only parsing).
 Notation "'front'" := (
   in_type "zoo_saturn.mpmc_queue_2.t" 0
 )(in custom zoo_field
 ).
+Notation back := (  in_type "zoo_saturn.mpmc_queue_2.t" 1
+) (only parsing).
 Notation "'back'" := (
   in_type "zoo_saturn.mpmc_queue_2.t" 1
 )(in custom zoo_field

@@ -9,10 +9,14 @@ From zoo_std Require Import
 From zoo Require Import
   options.
 
+Notation size := (  in_type "zoo_std.dynarray_1.t" 0
+) (only parsing).
 Notation "'size'" := (
   in_type "zoo_std.dynarray_1.t" 0
 )(in custom zoo_field
 ).
+Notation data := (  in_type "zoo_std.dynarray_1.t" 1
+) (only parsing).
 Notation "'data'" := (
   in_type "zoo_std.dynarray_1.t" 1
 )(in custom zoo_field

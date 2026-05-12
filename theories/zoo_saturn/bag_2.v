@@ -161,7 +161,7 @@ Section bag_2_G.
 
   #[local] Definition descriptor_model γ node descr : iProp Σ :=
     ∃ o,
-    node.[queue] ↦ o ∗
+    node ↦[queue] o ∗
     ⌜from_option (.= descr.(descriptor_queue)) True o⌝ ∗
     spmc_queue_inv descr.(descriptor_queue) (γ.(metadata_inv).@"producer") ∗
     spmc_queue_model descr.(descriptor_queue) descr.(descriptor_vals).
@@ -176,7 +176,7 @@ Section bag_2_G.
 
   #[local] Definition inv_inner l γ : iProp Σ :=
     ∃ nodes descrs wss,
-    l.[producers] ↦ from_option #@{location} §Null (head nodes) ∗
+    l ↦[producers] from_option #@{location} §Null (head nodes) ∗
     xtchain (Header §Node 2) DfracDiscarded nodes §Null ∗
     queues_auth γ nodes descrs wss ∗
     model₂ γ wss ∗

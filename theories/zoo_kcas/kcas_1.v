@@ -398,7 +398,7 @@ Section kcas_1_G.
     ι.@"casn".@casn.
   #[local] Definition casn_inv_inner casn η ι Ψ : iProp Σ :=
     ∃ 𝑠𝑡𝑎𝑡𝑢𝑠 lstatus helpers prophs,
-    casn.[status] ↦ 𝑠𝑡𝑎𝑡𝑢𝑠 ∗
+    casn ↦[status] 𝑠𝑡𝑎𝑡𝑢𝑠 ∗
     lstatus_auth η lstatus ∗
     helpers_auth η helpers ∗
     prophet_typed_model global_prophet η.(metadata_prophet) prophs ∗
@@ -417,8 +417,8 @@ Section kcas_1_G.
           helper_au η ι j P
         ) ∗
         ( [∗ list] descr ∈ η.(metadata_descrs),
-          descr.(descriptor_state).[before] ↦ descr.(descriptor_before) ∗
-          descr.(descriptor_state).[after] ↦ descr.(descriptor_after)
+          descr.descriptor_state ↦[before] descr.(descriptor_before) ∗
+          descr.descriptor_state ↦[after] descr.(descriptor_after)
         ) ∗
         ( [∗ list] descr ∈ take i η.(metadata_descrs),
           model₂ descr.(descriptor_meta) descr.(descriptor_before) ∗
@@ -442,11 +442,11 @@ Section kcas_1_G.
           ) ∗
           if metadata_success η then
             history_elem descr.(descriptor_meta) casn ∗
-            descr.(descriptor_state).[after] ↦ descr.(descriptor_after) ∗
-            descr.(descriptor_state).[before] ↦-
+            descr.descriptor_state ↦[after] descr.(descriptor_after) ∗
+            descr.descriptor_state ↦[before]-
           else
-            descr.(descriptor_state).[before] ↦ descr.(descriptor_before) ∗
-            descr.(descriptor_state).[after] ↦-
+            descr.descriptor_state ↦[before] descr.(descriptor_before) ∗
+            descr.descriptor_state ↦[after]-
         )
     end.
   #[local] Instance : CustomIpat "casn_inv_inner" :=
@@ -486,7 +486,7 @@ Section kcas_1_G.
   :=
     λ '(casn, η, i), (
       ∃ Ψ,
-      casn.[proph] ↦□ #η.(metadata_prophet) ∗
+      casn ↦[proph]□ #η.(metadata_prophet) ∗
       saved_pred η.(metadata_post) Ψ ∗
       ⌜NoDup (descriptor_loc <$> η.(metadata_descrs))⌝ ∗
       inv (casn_inv_name ι casn) (casn_inv_inner casn η ι Ψ) ∗
@@ -494,14 +494,14 @@ Section kcas_1_G.
         if i is Some i then
           if decide (j = i) then
             descr.(descriptor_loc) ↪ descr.(descriptor_meta) ∗
-            descr.(descriptor_state).[casn] ↦□ #casn
+            descr.descriptor_state ↦[casn]□ #casn
           else
             descr.(descriptor_loc) ↪ descr.(descriptor_meta) ∗
-            descr.(descriptor_state).[casn] ↦□ #casn ∗
+            descr.descriptor_state ↦[casn]□ #casn ∗
             loc_inv' (descr.(descriptor_loc), descr.(descriptor_meta))
         else
           descr.(descriptor_loc) ↪ descr.(descriptor_meta) ∗
-          descr.(descriptor_state).[casn] ↦□ #casn ∗
+          descr.descriptor_state ↦[casn]□ #casn ∗
           loc_inv' (descr.(descriptor_loc), descr.(descriptor_meta))
     )%I.
   #[local] Instance : CustomIpat "casn_inv" :=
@@ -2226,9 +2226,9 @@ Section kcas_1_G.
     pose (Ψ i (_ : val) 𝑐𝑎𝑠 := (
       ∃ descr,
       ⌜𝑐𝑎𝑠 = descriptor_cas descr⌝ ∗
-      descr.(descriptor_state).[casn] ↦□ #casn ∗
-      ( descr.(descriptor_state).[before] ↦ descr.(descriptor_before) ∗
-        descr.(descriptor_state).[after] ↦ descr.(descriptor_after)
+      descr.descriptor_state ↦[casn]□ #casn ∗
+      ( descr.descriptor_state ↦[before] descr.(descriptor_before) ∗
+        descr.descriptor_state ↦[after] descr.(descriptor_after)
       ) ∗
         ∃ γ,
         ⌜γs !! i = Some γ⌝ ∗

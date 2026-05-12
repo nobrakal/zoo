@@ -445,9 +445,9 @@ Module base.
 
     #[local] Definition inv_inner t γ : iProp Σ :=
       ∃ state stable front back data cap hist vs priv datas pasts prophss,
-      t.[front] ↦ #front ∗
-      t.[back] ↦ #back ∗
-      t.[data] ↦ data ∗
+      t ↦[front] #front ∗
+      t ↦[back] #back ∗
+      t ↦[data] data ∗
       owner₂ γ stable back data cap ∗
       front_auth γ front ∗
       ⌜0 < front⌝ ∗
@@ -495,7 +495,7 @@ Module base.
         )
       ".
     #[local] Definition inv' t γ : iProp Σ :=
-      t.[proph] ↦□ #γ.(ws_deque_1_name_prophet) ∗
+      t ↦[proph]□ #γ.(ws_deque_1_name_prophet) ∗
       inv γ.(ws_deque_1_name_inv) (inv_inner t γ).
     #[local] Instance : CustomIpat "inv'" :=
       " ( #Ht_proph

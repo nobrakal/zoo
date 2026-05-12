@@ -232,8 +232,8 @@ Section rcfd_G.
 
   #[local] Definition inv_inner l γ Ψ : iProp Σ :=
     ∃ state lstate ops,
-    l.[ops] ↦ #ops ∗
-    l.[state] ↦ state_to_val γ state ∗
+    l ↦[ops] #ops ∗
+    l ↦[state] state_to_val γ state ∗
     lstate_auth γ lstate ∗
     inv_lstate γ Ψ state lstate ops.
   #[local] Instance : CustomIpat "inv_inner" :=

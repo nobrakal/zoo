@@ -17,14 +17,20 @@ Notation "'Diff'" := (
 )(in custom zoo_tag
 ).
 
+Notation equal := (  in_type "zoo_persistent.parray_2.t" 0
+) (only parsing).
 Notation "'equal'" := (
   in_type "zoo_persistent.parray_2.t" 0
 )(in custom zoo_field
 ).
+Notation data := (  in_type "zoo_persistent.parray_2.t" 1
+) (only parsing).
 Notation "'data'" := (
   in_type "zoo_persistent.parray_2.t" 1
 )(in custom zoo_field
 ).
+Notation root := (  in_type "zoo_persistent.parray_2.t" 2
+) (only parsing).
 Notation "'root'" := (
   in_type "zoo_persistent.parray_2.t" 2
 )(in custom zoo_field

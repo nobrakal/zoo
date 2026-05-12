@@ -17,10 +17,14 @@ Notation "'Cons'" := (
 )(in custom zoo_tag
 ).
 
+Notation capacity := (  in_type "zoo_saturn.mpmc_bstack.t" 0
+) (only parsing).
 Notation "'capacity'" := (
   in_type "zoo_saturn.mpmc_bstack.t" 0
 )(in custom zoo_field
 ).
+Notation front := (  in_type "zoo_saturn.mpmc_bstack.t" 1
+) (only parsing).
 Notation "'front'" := (
   in_type "zoo_saturn.mpmc_bstack.t" 1
 )(in custom zoo_field

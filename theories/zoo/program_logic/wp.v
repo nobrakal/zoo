@@ -715,12 +715,12 @@ Section zoo_G.
 
   Lemma wp_load l fld dq v tid E :
     {{{
-      ▷ (l +ₗ fld) ↦{dq} v
+      ▷ l ↦[fld]{dq} v
     }}}
       Load #l #fld ∷ tid @ E
     {{{
       RET v;
-      (l +ₗ fld) ↦{dq} v
+      l ↦[fld]{dq} v
     }}}.
   Proof.
     iIntros "%Φ >Hl HΦ".
@@ -734,12 +734,12 @@ Section zoo_G.
 
   Lemma wp_store l fld w v tid E :
     {{{
-      ▷ (l +ₗ fld) ↦ w
+      ▷ l ↦[fld] w
     }}}
       Store #l #fld v ∷ tid @ E
     {{{
       RET ();
-      (l +ₗ fld) ↦ v
+      l ↦[fld] v
     }}}.
   Proof.
     iIntros "%Φ >Hl HΦ".
@@ -754,12 +754,12 @@ Section zoo_G.
 
   Lemma wp_xchg l fld w v tid E :
     {{{
-      ▷ (l +ₗ fld) ↦ w
+      ▷ l ↦[fld] w
     }}}
       Xchg (#l, #fld)%V v ∷ tid @ E
     {{{
       RET w;
-      (l +ₗ fld) ↦ v
+      l ↦[fld] v
     }}}.
   Proof.
     iIntros "%Φ >Hl HΦ".
@@ -773,14 +773,14 @@ Section zoo_G.
   Qed.
 
   Lemma wp_cas_nobranch l fld dq v v1 v2 tid E Φ :
-    ▷ (l +ₗ fld) ↦{dq} v -∗
+    ▷ l ↦[fld]{dq} v -∗
     ▷ (
       ∀ b,
       ⌜(if b then (≈) else (≉)) v v1⌝ -∗
-      (l +ₗ fld) ↦{dq} v -∗
+      l ↦[fld]{dq} v -∗
         ⌜if b then dq = DfracOwn 1 else True⌝ ∗
-        (l +ₗ fld) ↦{dq} v ∗
-        ( (l +ₗ fld) ↦{dq} (if b then v2 else v) -∗
+        l ↦[fld]{dq} v ∗
+        ( l ↦[fld]{dq} (if b then v2 else v) -∗
           Φ #b
         )
     ) -∗
@@ -798,11 +798,11 @@ Section zoo_G.
     iSteps.
   Qed.
   Lemma wp_cas_nobranch' l fld v v1 v2 tid E Φ :
-    ▷ (l +ₗ fld) ↦ v -∗
+    ▷ l ↦[fld] v -∗
     ▷ (
       ∀ b,
       ⌜(if b then (≈) else (≉)) v v1⌝ -∗
-      (l +ₗ fld) ↦ (if b then v2 else v) -∗
+      l ↦[fld] (if b then v2 else v) -∗
       Φ #b
     ) -∗
     WP CAS (#l, #fld)%V v1 v2 ∷ tid @ E {{ Φ }}.
@@ -812,17 +812,17 @@ Section zoo_G.
     destruct b; iSteps.
   Qed.
   Lemma wp_cas l fld dq v v1 v2 tid E Φ :
-    ▷ (l +ₗ fld) ↦{dq} v -∗
+    ▷ l ↦[fld]{dq} v -∗
     ▷ (
       ( ⌜v ≉ v1⌝ -∗
-        (l +ₗ fld) ↦{dq} v -∗
+        l ↦[fld]{dq} v -∗
         Φ false%V
       ) ∧ (
         ⌜v ≈ v1⌝ -∗
-        (l +ₗ fld) ↦{dq} v -∗
+        l ↦[fld]{dq} v -∗
           ⌜dq = DfracOwn 1⌝ ∗
-          (l +ₗ fld) ↦{dq} v ∗
-          ( (l +ₗ fld) ↦ v2 -∗
+          l ↦[fld]{dq} v ∗
+          ( l ↦[fld] v2 -∗
             Φ true%V
           )
       )
@@ -836,14 +836,14 @@ Section zoo_G.
     all: iSteps.
   Qed.
   Lemma wp_cas' l fld v v1 v2 tid E Φ :
-    ▷ (l +ₗ fld) ↦ v -∗
+    ▷ l ↦[fld] v -∗
     ▷ (
       ( ⌜v ≉ v1⌝ -∗
-        (l +ₗ fld) ↦ v -∗
+        l ↦[fld] v -∗
         Φ false%V
       ) ∧ (
         ⌜v ≈ v1⌝ -∗
-        (l +ₗ fld) ↦ v2 -∗
+        l ↦[fld] v2 -∗
         Φ true%V
       )
     ) -∗
@@ -859,12 +859,12 @@ Section zoo_G.
 
   Lemma wp_faa l fld (i1 i2 : Z) tid E :
     {{{
-      ▷ (l +ₗ fld) ↦ #i1
+      ▷ l ↦[fld] #i1
     }}}
       FAA (#l, #fld)%V #i2 ∷ tid @ E
     {{{
       RET #i1;
-      (l +ₗ fld) ↦ #(i1 + i2)
+      l ↦[fld] #(i1 + i2)
     }}}.
   Proof.
     iIntros "%Φ >Hl HΦ".

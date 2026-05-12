@@ -192,12 +192,12 @@ Section zoo_G.
   #[global] Instance load𑁒diaspec l fld E :
     DIASPEC v dq
     {{
-      ▷ (l +ₗ fld) ↦{dq} v
+      ▷ l ↦[fld]{dq} v
     }}
       Load #l #fld @ E
     {{
       RET v;
-      (l +ₗ fld) ↦{dq} v
+      l ↦[fld]{dq} v
     }}.
   Proof.
     iSteps.
@@ -208,12 +208,12 @@ Section zoo_G.
   #[global] Instance store𑁒diaspec l fld v E :
     DIASPEC w
     {{
-      ▷ (l +ₗ fld) ↦ w
+      ▷ l ↦[fld] w
     }}
       Store #l #fld v @ E
     {{
       RET ();
-      (l +ₗ fld) ↦ v
+      l ↦[fld] v
     }}.
   Proof.
     iSteps.
@@ -224,12 +224,12 @@ Section zoo_G.
   #[global] Instance xchg𑁒diaspec l fld v E :
     DIASPEC w
     {{
-      ▷ (l +ₗ fld) ↦ w
+      ▷ l ↦[fld] w
     }}
       Xchg (#l, #fld)%V v @ E
     {{
       RET w;
-      (l +ₗ fld) ↦ v
+      l ↦[fld] v
     }}.
   Proof.
     iSteps.
@@ -240,7 +240,7 @@ Section zoo_G.
   #[global] Instance cas𑁒diaspec l fld v1 v2 E :
     DIASPEC v dq
     {{
-      ▷ (l +ₗ fld) ↦{dq} v ∗
+      ▷ l ↦[fld]{dq} v ∗
       ⌜dq = DfracOwn 1 ∨ ¬ v ≈ v1⌝
     }}
       CAS (#l, #fld)%V v1 v2 @ E
@@ -248,10 +248,10 @@ Section zoo_G.
       RET #b;
         ⌜b = false⌝ ∗
         ⌜v ≉ v1⌝ ∗
-        (l +ₗ fld) ↦{dq} v
+        l ↦[fld]{dq} v
       ∨ ⌜b = true⌝ ∗
         ⌜v ≈ v1⌝ ∗
-        (l +ₗ fld) ↦ v2
+        l ↦[fld] v2
     }}.
   Proof.
     iSteps.
@@ -262,12 +262,12 @@ Section zoo_G.
   #[global] Instance faa𑁒diaspec l fld (n : Z) E :
     DIASPEC (z : Z)
     {{
-      ▷ (l +ₗ fld) ↦ #z
+      ▷ l ↦[fld] #z
     }}
       FAA (#l, #fld)%V #n @ E
     {{
       RET #z;
-      (l +ₗ fld) ↦ #(z + n)
+      l ↦[fld] #(z + n)
     }}.
   Proof.
     iSteps.

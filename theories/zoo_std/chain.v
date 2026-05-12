@@ -24,8 +24,8 @@ Section zoo_G.
         ∃ l t',
         ⌜t = #l⌝ ∗
         from_option (λ tag, l ↦ₕ Header tag 2) True tag ∗
-        l.[chain_next] ↦ t' ∗
-        l.[chain_data] ↦ v ∗
+        l ↦[chain_next] t' ∗
+        l ↦[chain_data] v ∗
         chain_model tag t' vs dst
     end.
   #[global] Arguments chain_model _ _ !_ _ / : assert.

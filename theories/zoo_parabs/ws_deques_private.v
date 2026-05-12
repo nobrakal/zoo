@@ -344,15 +344,15 @@ Section ws_deques_private_G.
     ⌜ι = γ.(metadata_inv)⌝ ∗
     ⌜sz = γ.(metadata_size)⌝ ∗
     l ↪ γ ∗
-    l.[size] ↦□ #γ.(metadata_size) ∗
-    l.[queues] ↦□ γ.(metadata_queues_array) ∗
+    l ↦[size]□ #γ.(metadata_size) ∗
+    l ↦[queues]□ γ.(metadata_queues_array) ∗
     ⌜length γ.(metadata_queues) = γ.(metadata_size)⌝ ∗
     array_model γ.(metadata_queues_array) DfracDiscarded γ.(metadata_queues) ∗
-    l.[statuses] ↦□ γ.(metadata_statuses_array) ∗
+    l ↦[statuses]□ γ.(metadata_statuses_array) ∗
     array_inv γ.(metadata_statuses_array) γ.(metadata_size) ∗
-    l.[requests] ↦□ γ.(metadata_requests_array) ∗
+    l ↦[requests]□ γ.(metadata_requests_array) ∗
     array_inv γ.(metadata_requests_array) γ.(metadata_size) ∗
-    l.[responses] ↦□ γ.(metadata_responses_array) ∗
+    l ↦[responses]□ γ.(metadata_responses_array) ∗
     array_inv γ.(metadata_responses_array) γ.(metadata_size) ∗
     inv ι (inv_inner γ).
   #[local] Instance : CustomIpat "inv" :=
@@ -1208,7 +1208,7 @@ Section ws_deques_private_G.
     i_ < γ.(metadata_size) →
     {{{
       l ↪ γ ∗
-      l.[responses] ↦□ γ.(metadata_responses_array) ∗
+      l ↦[responses]□ γ.(metadata_responses_array) ∗
       array_inv γ.(metadata_responses_array) γ.(metadata_size) ∗
       inv γ.(metadata_inv) (inv_inner γ) ∗
       channels_receiver γ i_ Ψ None

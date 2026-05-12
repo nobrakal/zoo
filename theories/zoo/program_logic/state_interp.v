@@ -31,6 +31,10 @@ Record state_wf σ v :=
       σ.(state_locals) = [v]
   ; state_wf_counter :
       σ.(state_heap) !! zoo_counter = Some 0%V
+  ; state_wf_headers :
+      ∀ l,
+      is_Some (σ.(state_heap) !! l) →
+      is_Some (σ.(state_headers) !! l)
   }.
 
 Section zoo_G.
@@ -83,26 +87,6 @@ End zoo_G.
 Section zoo_G.
   Context `{zoo_G : !ZooG Σ}.
 
-  #[local] Lemma big_sepM_chunk {A} (Φ : location → A → iProp Σ) l xs :
-    ([∗ map] l ↦ x ∈ chunk l xs, Φ l x) ⊢
-    [∗ list] i ↦ x ∈ xs, Φ (l +ₗ i) x.
-  Proof.
-    iInduction xs as [| x xs] "IH" forall (l) => /=. 1: iSteps.
-    iIntros "H".
-    rewrite big_sepM_insert.
-    { clear.
-      apply eq_None_ne_Some. intros x (k & Hk & Hl & _)%chunk_lookup.
-      rewrite -{1}(location_add_0 l) in Hl.
-      naive_solver lia.
-    }
-    iEval (rewrite location_add_0).
-    iSteps.
-    iEval (setoid_rewrite Nat2Z.inj_succ).
-    iEval (setoid_rewrite <- Z.add_1_l).
-    iEval (setoid_rewrite <- location_add_assoc).
-    iSteps.
-  Qed.
-
   Lemma state_interp_alloc {ns nt σ κs} l tag vs :
     σ.(state_headers) !! l = None →
     ( ∀ i,
@@ -117,10 +101,10 @@ Section zoo_G.
       l ↦∗ vs.
   Proof.
     iIntros "%Hheaders_lookup %Hheap_lookup (:state_interp)".
-    iMod (headers_insert with "Hheaders_auth") as "($ & Hl_header & $)". 1: done.
-    iMod (heap_insert (chunk _ _) with "Hheap_auth") as "($ & Hl)".
-    { apply chunk_map_disjoint => //. }
-    rewrite big_sepM_chunk. iSteps.
+    iMod (headers_insert with "Hheaders_auth") as "($ & #Hl_header & $)". 1: done.
+    iFrame "Hl_header".
+    iMod (heap_insert _ _ vs Hheap_lookup with "Hl_header Hheap_auth") as "($ & $)".
+    iFrameSteps.
   Qed.
 
   Lemma state_interp_headers_at_valid ns nt σ κs l hdr :
@@ -132,10 +116,10 @@ Section zoo_G.
     iApply (headers_lookup with "Hheaders_auth Hl_header").
   Qed.
 
-  Lemma state_interp_pointsto_valid ns nt σ κs l dq v :
+  Lemma state_interp_pointsto_valid ns nt σ κs l i dq v :
     state_interp ns nt σ κs -∗
-    l ↦{dq} v -∗
-    ⌜σ.(state_heap) !! l = Some v⌝.
+    l ↦[i]{dq} v -∗
+    ⌜σ.(state_heap) !! (l +ₗ i) = Some v⌝.
   Proof.
     iIntros "(:state_interp) Hl".
     iApply (heap_lookup with "Hheap_auth Hl").
@@ -152,11 +136,11 @@ Section zoo_G.
     iDestruct (big_sepL_lookup with "Hl") as "Hl"; first done.
     iApply (heap_lookup with "Hheap_auth Hl").
   Qed.
-  Lemma state_interp_pointsto_update {ns nt σ κs l w} v :
+  Lemma state_interp_pointsto_update {ns nt σ κs l i w} v :
     state_interp ns nt σ κs -∗
-    l ↦ w ==∗
-      state_interp ns nt (state_set_location l v σ) κs ∗
-      l ↦ v.
+    l ↦[i] w ==∗
+      state_interp ns nt (state_set_location (l +ₗ i) v σ) κs ∗
+      l ↦[i] v.
   Proof.
     iIntros "(:state_interp) Hl".
     iMod (heap_update with "Hheap_auth Hl") as "(Hheap_auth & Hl)".
@@ -247,6 +231,7 @@ Lemma state_interp_init `{zoo_Gpre : !ZooGpre Σ} `{inv_G : !invGS Σ} σ v κs 
 Proof.
   intros Hwf.
   iMod (zoo_init σ.(state_headers) σ.(state_heap) σ.(state_prophets) σ.(state_locals) κs) as "(%zoo_G & $ & $ & $ & $ & $ & $ & $ & $ & Hlocals)".
+  { apply Hwf. }
   { apply Hwf. }
   iEval (rewrite (state_wf_locals _ v) //) in "Hlocals" |- *.
   iDestruct "Hlocals" as "($ & _)" => //.

@@ -32,7 +32,7 @@ Section zoo_G.
 
   #[local] Definition element_model elem v : iProp Σ :=
     elem ↦ₕ Header 1 §Element ∗
-    elem.[value] ↦ v.
+    elem ↦[value] v.
   #[local] Instance : CustomIpat "element_model" :=
     " ( Helem_header
       & Helem_value
@@ -41,8 +41,8 @@ Section zoo_G.
   Definition dynarray_2_model t vs : iProp Σ :=
     ∃ l data elems extra,
     ⌜t = #l⌝ ∗
-    l.[size] ↦ #(length vs) ∗
-    l.[data] ↦ data ∗
+    l ↦[size] #(length vs) ∗
+    l ↦[data] data ∗
     array_model data (DfracOwn 1) ((#*@{location} elems) ++ replicate extra §Empty%V) ∗
     [∗ list] elem; v ∈ elems; vs, element_model elem v.
   #[local] Instance : CustomIpat "model" :=
@@ -943,7 +943,7 @@ Section zoo_G.
     elem ↦ₕ Header 1 §Element ∗
     inv nroot (
       ∃ v,
-      elem.[value] ↦ v ∗
+      elem ↦[value] v ∗
       τ v
     ).
 
@@ -1004,8 +1004,8 @@ Section zoo_G.
     ⌜t = #l⌝ ∗
     inv nroot (
       ∃ (sz : nat) cap data,
-      l.[size] ↦ #sz ∗
-      l.[data] ↦ data ∗ itype_array itype_slot cap data
+      l ↦[size] #sz ∗
+      l ↦[data] data ∗ itype_array itype_slot cap data
     ).
   #[global] Instance itype_dynarray_2_itype :
     iType _ itype_dynarray_2.

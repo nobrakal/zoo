@@ -12,14 +12,20 @@ From zoo_std Require Import
 From zoo Require Import
   options.
 
+Notation task := (  in_type "zoo_parabs.vertex.t" 0
+) (only parsing).
 Notation "'task'" := (
   in_type "zoo_parabs.vertex.t" 0
 )(in custom zoo_field
 ).
+Notation preds := (  in_type "zoo_parabs.vertex.t" 1
+) (only parsing).
 Notation "'preds'" := (
   in_type "zoo_parabs.vertex.t" 1
 )(in custom zoo_field
 ).
+Notation succs := (  in_type "zoo_parabs.vertex.t" 2
+) (only parsing).
 Notation "'succs'" := (
   in_type "zoo_parabs.vertex.t" 2
 )(in custom zoo_field

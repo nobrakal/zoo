@@ -26,9 +26,9 @@ Section zoo_G.
     | node :: nodes =>
         match nodes with
         | [] =>
-            node.[xchain_next] ↦{dq} dst
+            node ↦[xchain_next]{dq} dst
         | node' :: _ =>
-            node.[xchain_next] ↦{dq} #node' ∗
+            node ↦[xchain_next]{dq} #node' ∗
             xchain dq nodes dst
         end
     end.
@@ -54,18 +54,18 @@ Section zoo_G.
 
   Lemma xchain_singleton dq node dst :
     xchain dq [node] dst ⊣⊢
-    node.[xchain_next] ↦{dq} dst.
+    node ↦[xchain_next]{dq} dst.
   Proof.
     iSteps.
   Qed.
   Lemma xchain_singleton_1 dq node dst :
     xchain dq [node] dst ⊢
-    node.[xchain_next] ↦{dq} dst.
+    node ↦[xchain_next]{dq} dst.
   Proof.
     iSteps.
   Qed.
   Lemma xchain_singleton_2 dq node dst :
-    node.[xchain_next] ↦{dq} dst ⊢
+    node ↦[xchain_next]{dq} dst ⊢
     xchain dq [node] dst.
   Proof.
     iSteps.
@@ -74,14 +74,14 @@ Section zoo_G.
   Lemma xchain_cons {dq} nodes node nodes' dst :
     nodes = node :: nodes' →
     xchain dq nodes dst ⊣⊢
-      node.[xchain_next] ↦{dq} from_option #@{location} dst (head nodes') ∗
+      node ↦[xchain_next]{dq} from_option #@{location} dst (head nodes') ∗
       xchain dq nodes' dst.
   Proof.
     destruct nodes'; iSteps.
   Qed.
   Lemma xchain_cons' {dq} node nodes dst :
     xchain dq (node :: nodes) dst ⊣⊢
-      node.[xchain_next] ↦{dq} from_option #@{location} dst (head nodes) ∗
+      node ↦[xchain_next]{dq} from_option #@{location} dst (head nodes) ∗
       xchain dq nodes dst.
   Proof.
     rewrite xchain_cons //.
@@ -89,7 +89,7 @@ Section zoo_G.
   Lemma xchain_cons_1 {dq} nodes node nodes' dst :
     nodes = node :: nodes' →
     xchain dq nodes dst ⊢
-      node.[xchain_next] ↦{dq} from_option #@{location} dst (head nodes') ∗
+      node ↦[xchain_next]{dq} from_option #@{location} dst (head nodes') ∗
       xchain dq nodes' dst.
   Proof.
     intros.
@@ -97,13 +97,13 @@ Section zoo_G.
   Qed.
   Lemma xchain_cons_1' {dq} node nodes dst :
     xchain dq (node :: nodes) dst ⊢
-      node.[xchain_next] ↦{dq} from_option #@{location} dst (head nodes) ∗
+      node ↦[xchain_next]{dq} from_option #@{location} dst (head nodes) ∗
       xchain dq nodes dst.
   Proof.
     rewrite xchain_cons //.
   Qed.
   Lemma xchain_cons_2 dq node nodes dst :
-    node.[xchain_next] ↦{dq} from_option #@{location} dst (head nodes) -∗
+    node ↦[xchain_next]{dq} from_option #@{location} dst (head nodes) -∗
     xchain dq nodes dst -∗
     xchain dq (node :: nodes) dst.
   Proof.
@@ -161,7 +161,7 @@ Section zoo_G.
     nodes = nodes' ++ [node] →
     xchain dq nodes dst ⊣⊢
       xchain dq nodes' #node ∗
-      node.[xchain_next] ↦{dq} dst.
+      node ↦[xchain_next]{dq} dst.
   Proof.
     intros.
     rewrite xchain_app //.
@@ -169,7 +169,7 @@ Section zoo_G.
   Lemma xchain_snoc' {dq} nodes node dst :
     xchain dq (nodes ++ [node]) dst ⊣⊢
       xchain dq nodes #node ∗
-      node.[xchain_next] ↦{dq} dst.
+      node ↦[xchain_next]{dq} dst.
   Proof.
     rewrite xchain_snoc //.
   Qed.
@@ -177,7 +177,7 @@ Section zoo_G.
     nodes = nodes' ++ [node] →
     xchain dq nodes dst ⊢
       xchain dq nodes' #node ∗
-      node.[xchain_next] ↦{dq} dst.
+      node ↦[xchain_next]{dq} dst.
   Proof.
     intros.
     rewrite xchain_snoc //.
@@ -185,13 +185,13 @@ Section zoo_G.
   Lemma xchain_snoc_1' {dq} nodes node dst :
     xchain dq (nodes ++ [node]) dst ⊢
       xchain dq nodes #node ∗
-      node.[xchain_next] ↦{dq} dst.
+      node ↦[xchain_next]{dq} dst.
   Proof.
     rewrite xchain_snoc_1 //.
   Qed.
   Lemma xchain_snoc_2 dq nodes node dst :
     xchain dq nodes #node -∗
-    node.[xchain_next] ↦{dq} dst -∗
+    node ↦[xchain_next]{dq} dst -∗
     xchain dq (nodes ++ [node]) dst.
   Proof.
     rewrite (xchain_snoc (nodes ++ [node])) //. iSteps.
@@ -201,7 +201,7 @@ Section zoo_G.
     nodes !! i = Some node →
     xchain dq nodes dst ⊣⊢
       xchain dq (take i nodes) #node ∗
-      node.[xchain_next] ↦{dq} from_option #@{location} dst (nodes !! S i) ∗
+      node ↦[xchain_next]{dq} from_option #@{location} dst (nodes !! S i) ∗
       xchain dq (drop (S i) nodes) dst.
   Proof.
     intros Hlookup.
@@ -212,7 +212,7 @@ Section zoo_G.
     nodes !! i = Some node →
     xchain dq nodes dst ⊢
       xchain dq (take i nodes) #node ∗
-      node.[xchain_next] ↦{dq} from_option #@{location} dst (nodes !! S i) ∗
+      node ↦[xchain_next]{dq} from_option #@{location} dst (nodes !! S i) ∗
       xchain dq (drop (S i) nodes) dst.
   Proof.
     intros.
@@ -222,7 +222,7 @@ Section zoo_G.
     nodes !! i = Some node →
     next = from_option #@{location} dst (nodes !! S i) →
     xchain dq (take i nodes) #node -∗
-    node.[xchain_next] ↦{dq} next -∗
+    node ↦[xchain_next]{dq} next -∗
     xchain dq (drop (S i) nodes) dst -∗
     xchain dq nodes dst.
   Proof.
@@ -232,8 +232,8 @@ Section zoo_G.
   Lemma xchain_lookup_acc {dq nodes} i node dst :
     nodes !! i = Some node →
     xchain dq nodes dst ⊢
-      node.[xchain_next] ↦{dq} from_option #@{location} dst (nodes !! S i) ∗
-      ( node.[xchain_next] ↦{dq} from_option #@{location} dst (nodes !! S i) -∗
+      node ↦[xchain_next]{dq} from_option #@{location} dst (nodes !! S i) ∗
+      ( node ↦[xchain_next]{dq} from_option #@{location} dst (nodes !! S i) -∗
         xchain dq nodes dst
       ).
   Proof.
@@ -244,7 +244,7 @@ Section zoo_G.
     last nodes = Some node →
     xchain dq nodes dst ⊣⊢
       xchain dq (removelast nodes) #node ∗
-      node.[xchain_next] ↦{dq} dst.
+      node ↦[xchain_next]{dq} dst.
   Proof.
     intros.
     rewrite {1}(last_removelast nodes node) // xchain_snoc' //.
@@ -252,9 +252,9 @@ Section zoo_G.
   Lemma xchain_last_acc {dq nodes dst} node :
     last nodes = Some node →
     xchain dq nodes dst ⊢
-      node.[xchain_next] ↦{dq} dst ∗
+      node ↦[xchain_next]{dq} dst ∗
       ( ∀ dst,
-        node.[xchain_next] ↦{dq} dst -∗
+        node ↦[xchain_next]{dq} dst -∗
         xchain dq nodes dst
       ).
   Proof.
@@ -469,7 +469,7 @@ Section zoo_G.
     last nodes = Some node →
     {{{
       xchain (DfracOwn 1) nodes dst ∗
-      node'.[xchain_next] ↦ dst'
+      node' ↦[xchain_next] dst'
     }}}
       #node <-{xchain_next} #node' @ E
     {{{

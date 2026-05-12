@@ -8,10 +8,14 @@ From zoo_std Require Import
 From zoo Require Import
   options.
 
+Notation ref_gen := (  in_type "zoo_persistent.pstore_2.ref" 0
+) (only parsing).
 Notation "'ref_gen'" := (
   in_type "zoo_persistent.pstore_2.ref" 0
 )(in custom zoo_field
 ).
+Notation ref_value := (  in_type "zoo_persistent.pstore_2.ref" 1
+) (only parsing).
 Notation "'ref_value'" := (
   in_type "zoo_persistent.pstore_2.ref" 1
 )(in custom zoo_field
@@ -26,10 +30,14 @@ Notation "'Diff'" := (
 )(in custom zoo_tag
 ).
 
+Notation gen := (  in_type "zoo_persistent.pstore_2.t" 0
+) (only parsing).
 Notation "'gen'" := (
   in_type "zoo_persistent.pstore_2.t" 0
 )(in custom zoo_field
 ).
+Notation root := (  in_type "zoo_persistent.pstore_2.t" 1
+) (only parsing).
 Notation "'root'" := (
   in_type "zoo_persistent.pstore_2.t" 1
 )(in custom zoo_field

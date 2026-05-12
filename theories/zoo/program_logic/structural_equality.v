@@ -123,7 +123,7 @@ Section zoo_G.
     [∗ map] l ↦ blk ∈ footprint,
       l ↦ₕ Header blk.(structeq_block_tag) (length blk.(structeq_block_fields)) ∗
       [∗ list] i ↦ fld ∈ blk.(structeq_block_fields),
-        (l +ₗ i) ↦{fld.(structeq_field_dfrac)} fld.(structeq_field_val) ∗
+        l ↦[i]{fld.(structeq_field_dfrac)} fld.(structeq_field_val) ∗
         ⌜val_traversable footprint fld.(structeq_field_val)⌝.
 
   Lemma structeq_footprint_empty :
@@ -145,9 +145,9 @@ Section zoo_G.
     footprint !! l = Some blk →
     blk.(structeq_block_fields) !! i = Some fld →
     structeq_footprint footprint ⊢
-      (l +ₗ i) ↦{fld.(structeq_field_dfrac)} fld.(structeq_field_val) ∗
+      l ↦[i]{fld.(structeq_field_dfrac)} fld.(structeq_field_val) ∗
       ⌜val_traversable footprint fld.(structeq_field_val)⌝ ∗
-      ( (l +ₗ i) ↦{fld.(structeq_field_dfrac)} fld.(structeq_field_val) -∗
+      ( l ↦[i]{fld.(structeq_field_dfrac)} fld.(structeq_field_val) -∗
         structeq_footprint footprint
       ).
   Proof.
@@ -162,9 +162,9 @@ Section zoo_G.
     structeq_footprint footprint ⊢
       ∃ fld,
       ⌜blk.(structeq_block_fields) !! i = Some fld⌝ ∗
-      (l +ₗ i) ↦{fld.(structeq_field_dfrac)} fld.(structeq_field_val) ∗
+      l ↦[i]{fld.(structeq_field_dfrac)} fld.(structeq_field_val) ∗
       ⌜val_traversable footprint fld.(structeq_field_val)⌝ ∗
-      ( (l +ₗ i) ↦{fld.(structeq_field_dfrac)} fld.(structeq_field_val) -∗
+      ( l ↦[i]{fld.(structeq_field_dfrac)} fld.(structeq_field_val) -∗
         structeq_footprint footprint
       ).
   Proof.

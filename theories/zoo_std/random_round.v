@@ -28,9 +28,9 @@ Section zoo_G.
     ∃ l rand arr nexts,
     ⌜t = #l⌝ ∗
     ⌜nexts ++ reverse prevs ≡ₚ seq 0 sz⌝ ∗
-    l.[random] ↦ rand ∗
-    l.[array] ↦ arr ∗
-    l.[index] ↦ #(length nexts) ∗
+    l ↦[random] rand ∗
+    l ↦[array] arr ∗
+    l ↦[index] #(length nexts) ∗
     random_state_model rand ∗
     array_model arr (DfracOwn 1) (#*@{nat} $ nexts ++ reverse prevs).
   #[local] Instance : CustomIpat "model" :=

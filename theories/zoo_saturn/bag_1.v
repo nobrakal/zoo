@@ -112,8 +112,8 @@ Section bag_1_G.
 
   #[local] Definition inv_inner l γ : iProp Σ :=
     ∃ front back vs os,
-    l.[front] ↦ #front ∗
-    l.[back] ↦ #back ∗
+    l ↦[front] #front ∗
+    l ↦[back] #back ∗
     model₂ γ vs ∗
     ⌜consistent vs os⌝ ∗
     [∗ list] slot; o ∈ γ.(metadata_slots); os,
@@ -138,7 +138,7 @@ Section bag_1_G.
     ⌜ι = γ.(metadata_inv)⌝ ∗
     ⌜0 < length γ.(metadata_slots)⌝ ∗
     l ↪ γ ∗
-    l.[data] ↦□ γ.(metadata_data) ∗
+    l ↦[data]□ γ.(metadata_data) ∗
     array_model γ.(metadata_data) DfracDiscarded (#*@{location} γ.(metadata_slots)) ∗
     inv' l γ.
   #[local] Instance : CustomIpat "inv" :=

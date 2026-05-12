@@ -20,15 +20,21 @@ Notation "'Element'" := (
 )(in custom zoo_tag
 ).
 
+Notation value := (  in_type "zoo_std.dynarray_2.slot.Element" 0
+) (only parsing).
 Notation "'value'" := (
   in_type "zoo_std.dynarray_2.slot.Element" 0
 )(in custom zoo_field
 ).
 
+Notation size := (  in_type "zoo_std.dynarray_2.t" 0
+) (only parsing).
 Notation "'size'" := (
   in_type "zoo_std.dynarray_2.t" 0
 )(in custom zoo_field
 ).
+Notation data := (  in_type "zoo_std.dynarray_2.t" 1
+) (only parsing).
 Notation "'data'" := (
   in_type "zoo_std.dynarray_2.t" 1
 )(in custom zoo_field

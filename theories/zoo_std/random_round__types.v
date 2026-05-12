@@ -9,14 +9,20 @@ From zoo_std Require Import
 From zoo Require Import
   options.
 
+Notation random := (  in_type "zoo_std.random_round.t" 0
+) (only parsing).
 Notation "'random'" := (
   in_type "zoo_std.random_round.t" 0
 )(in custom zoo_field
 ).
+Notation array := (  in_type "zoo_std.random_round.t" 1
+) (only parsing).
 Notation "'array'" := (
   in_type "zoo_std.random_round.t" 1
 )(in custom zoo_field
 ).
+Notation index := (  in_type "zoo_std.random_round.t" 2
+) (only parsing).
 Notation "'index'" := (
   in_type "zoo_std.random_round.t" 2
 )(in custom zoo_field

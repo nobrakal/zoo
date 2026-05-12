@@ -77,7 +77,7 @@ Section mpsc_queue_2_G.
   #[local] Definition inv_inner l γ : iProp Σ :=
     ∃ front back,
     front₂ γ front ∗
-    l.[back] ↦ glist_to_val back ∗
+    l ↦[back] glist_to_val back ∗
     model₂ γ (front ++ reverse back).
   #[local] Instance : CustomIpat "inv_inner" :=
     " ( %front{}
@@ -119,7 +119,7 @@ Section mpsc_queue_2_G.
     ∃ l γ front,
     ⌜t = #l⌝ ∗
     l ↪ γ ∗
-    l.[front] ↦ glist_to_val front ∗
+    l ↦[front] glist_to_val front ∗
     front₁ γ front.
   #[local] Instance : CustomIpat "consumer" :=
     " ( %l_

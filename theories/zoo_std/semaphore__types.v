@@ -9,14 +9,20 @@ From zoo_std Require Import
 From zoo Require Import
   options.
 
+Notation mutex := (  in_type "zoo_std.semaphore.t" 0
+) (only parsing).
 Notation "'mutex'" := (
   in_type "zoo_std.semaphore.t" 0
 )(in custom zoo_field
 ).
+Notation condition := (  in_type "zoo_std.semaphore.t" 1
+) (only parsing).
 Notation "'condition'" := (
   in_type "zoo_std.semaphore.t" 1
 )(in custom zoo_field
 ).
+Notation count := (  in_type "zoo_std.semaphore.t" 2
+) (only parsing).
 Notation "'count'" := (
   in_type "zoo_std.semaphore.t" 2
 )(in custom zoo_field

@@ -330,7 +330,7 @@ Section mpmc_queue_2_G.
 
   #[local] Definition back_model_1 back (i : nat) : iProp Σ :=
     back ↦ₕ Header §Back 2 ∗
-    back.[index] ↦□ #i.
+    back ↦[index]□ #i.
   #[local] Instance : CustomIpat "back_model_1" :=
     " ( { {!} _
         ; #Hback{}_header
@@ -341,7 +341,7 @@ Section mpmc_queue_2_G.
     ".
   #[local] Definition back_model_2 back (i : nat) 𝑚𝑜𝑣𝑒 : iProp Σ :=
     back_model_1 back i ∗
-    back.[move] ↦ 𝑚𝑜𝑣𝑒.
+    back ↦[move] 𝑚𝑜𝑣𝑒.
   #[local] Instance : CustomIpat "back_model_2" :=
     " ( { {only_move} _
         ; (:back_model_1 // /!/)
@@ -414,9 +414,9 @@ Section mpmc_queue_2_G.
 
   #[local] Definition inv_inner strong l γ : iProp Σ :=
     ∃ backs i status i_front vs_front i_back back vs_back vs,
-    l.[front] ↦ suffix_to_val i_front vs_front ∗
+    l ↦[front] suffix_to_val i_front vs_front ∗
     front_auth γ i_front ∗
-    l.[back] ↦ prefix_to_val i_back back vs_back ∗
+    l ↦[back] prefix_to_val i_back back vs_back ∗
     ([∗ map] back ↦ i ∈ backs, back_model_3 γ back i) ∗
     model₂ γ vs ∗
     state_auth γ backs i status ∗
@@ -846,7 +846,7 @@ Section mpmc_queue_2_G.
   #[local] Lemma mpmc_queue_2٠prefix_index𑁒spec (i : nat) back vs :
     {{{
       back ↦ₕ Header §Back 2 ∗
-      back.[index] ↦□ #i
+      back ↦[index]□ #i
     }}}
       mpmc_queue_2٠prefix_index (prefix_to_val i back vs)
     {{{

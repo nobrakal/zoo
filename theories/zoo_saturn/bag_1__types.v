@@ -10,14 +10,20 @@ From zoo_std Require Import
 From zoo Require Import
   options.
 
+Notation data := (  in_type "zoo_saturn.bag_1.t" 0
+) (only parsing).
 Notation "'data'" := (
   in_type "zoo_saturn.bag_1.t" 0
 )(in custom zoo_field
 ).
+Notation front := (  in_type "zoo_saturn.bag_1.t" 1
+) (only parsing).
 Notation "'front'" := (
   in_type "zoo_saturn.bag_1.t" 1
 )(in custom zoo_field
 ).
+Notation back := (  in_type "zoo_saturn.bag_1.t" 2
+) (only parsing).
 Notation "'back'" := (
   in_type "zoo_saturn.bag_1.t" 2
 )(in custom zoo_field

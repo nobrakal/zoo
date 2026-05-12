@@ -94,7 +94,7 @@ Section mpmc_bstack_G.
 
   #[local] Definition inv_inner l γ : iProp Σ :=
     ∃ vs,
-    l.[front] ↦ list_to_val (length vs) vs ∗
+    l ↦[front] list_to_val (length vs) vs ∗
     model₂ γ vs.
   #[local] Instance : CustomIpat "inv_inner" :=
     " ( %vs{}
@@ -108,7 +108,7 @@ Section mpmc_bstack_G.
     l ↪ γ ∗
     ⌜cap = γ.(metadata_capacity)⌝ ∗
     ⌜0 < γ.(metadata_capacity)⌝ ∗
-    l.[capacity] ↦□ #γ.(metadata_capacity) ∗
+    l ↦[capacity]□ #γ.(metadata_capacity) ∗
     inv ι (inv_inner l γ).
   #[local] Instance : CustomIpat "inv" :=
     " ( %l

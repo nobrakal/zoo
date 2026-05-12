@@ -6,14 +6,20 @@ From zoo.language Require Import
 From zoo Require Import
   options.
 
+Notation xdlchain_prev := (  in_type "zoo_std.xdlchain.t" 0
+) (only parsing).
 Notation "'xdlchain_prev'" := (
   in_type "zoo_std.xdlchain.t" 0
 )(in custom zoo_field
 ).
+Notation xdlchain_next := (  in_type "zoo_std.xdlchain.t" 1
+) (only parsing).
 Notation "'xdlchain_next'" := (
   in_type "zoo_std.xdlchain.t" 1
 )(in custom zoo_field
 ).
+Notation xdlchain_data := (  in_type "zoo_std.xdlchain.t" 2
+) (only parsing).
 Notation "'xdlchain_data'" := (
   in_type "zoo_std.xdlchain.t" 2
 )(in custom zoo_field

@@ -37,9 +37,9 @@ Section zoo_G.
   #[local] Definition model' t vs extra : iProp Σ :=
     ∃ l data cap front back,
     ⌜t = #l⌝ ∗
-    l.[data] ↦ data ∗
-    l.[front] ↦ #front ∗
-    l.[back] ↦ #back ∗
+    l ↦[data] data ∗
+    l ↦[front] #front ∗
+    l ↦[back] #back ∗
     array_cslice data cap front (DfracOwn 1) vs ∗
     array_cslice data cap back (DfracOwn 1) (replicate extra ()%V) ∗
     ⌜back = (front + length vs)%nat⌝ ∗

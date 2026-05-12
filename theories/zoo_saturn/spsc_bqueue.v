@@ -152,9 +152,9 @@ Section spsc_bqueue_G.
     ⌜back ≤ front + γ.(metadata_capacity)⌝ ∗
     ⌜length hist = back⌝ ∗
     ⌜vs = drop front hist⌝ ∗
-    l.[front] ↦ #front ∗
+    l ↦[front] #front ∗
     consumer₂ γ cstable front ∗
-    l.[back] ↦ #back ∗
+    l ↦[back] #back ∗
     producer₂ γ pstable back ∗
     model₂ γ vs ∗
     history_auth γ hist ∗
@@ -195,7 +195,7 @@ Section spsc_bqueue_G.
     ".
   #[local] Definition inv' l γ : iProp Σ :=
     l ↪ γ ∗
-    l.[data] ↦□ γ.(metadata_data) ∗
+    l ↦[data]□ γ.(metadata_data) ∗
     array_inv γ.(metadata_data) γ.(metadata_capacity) ∗
     inv γ.(metadata_inv) (inv_inner l γ).
   #[local] Instance : CustomIpat "inv'" :=
@@ -241,7 +241,7 @@ Section spsc_bqueue_G.
     ∃ l γ front_cache back,
     ⌜t = #l⌝ ∗
     l ↪ γ ∗
-    l.[front_cache] ↦ #front_cache ∗
+    l ↦[front_cache] #front_cache ∗
     producer₁ γ Stable back ws ∗
     front_lb γ front_cache.
   #[local] Instance : CustomIpat "producer" :=
@@ -261,7 +261,7 @@ Section spsc_bqueue_G.
     ∃ l γ front back_cache,
     ⌜t = #l⌝ ∗
     l ↪ γ ∗
-    l.[back_cache] ↦ #back_cache ∗
+    l ↦[back_cache] #back_cache ∗
     consumer₁ γ Stable front ∗
     back_lb γ back_cache.
   #[local] Instance : CustomIpat "consumer" :=
@@ -822,7 +822,7 @@ Section spsc_bqueue_G.
   #[local] Lemma spsc_bqueue٠push₀𑁒spec l γ front_cache stable back ws v Ψ :
     {{{
       inv' l γ ∗
-      l.[front_cache] ↦ #front_cache ∗
+      l ↦[front_cache] #front_cache ∗
       producer₁ γ stable back ws ∗
       front_lb γ front_cache ∗
       au_push l γ v Ψ
@@ -832,7 +832,7 @@ Section spsc_bqueue_G.
       b front_cache
     , RET #b;
       ⌜b = bool_decide (back < front_cache + γ.(metadata_capacity))⌝ ∗
-      l.[front_cache] ↦ #front_cache ∗
+      l ↦[front_cache] #front_cache ∗
       producer₁ γ stable back ws ∗
       front_lb γ front_cache ∗
       if b then
@@ -970,7 +970,7 @@ Section spsc_bqueue_G.
   #[local] Lemma spsc_bqueue٠pop₀𑁒spec l γ back_cache stable front Ψ :
     {{{
       inv' l γ ∗
-      l.[back_cache] ↦ #back_cache ∗
+      l ↦[back_cache] #back_cache ∗
       consumer₁ γ stable front ∗
       back_lb γ back_cache ∗
       au_pop l γ Ψ
@@ -980,7 +980,7 @@ Section spsc_bqueue_G.
       b back_cache
     , RET #b;
       ⌜b = bool_decide (front < back_cache)⌝ ∗
-      l.[back_cache] ↦ #back_cache ∗
+      l ↦[back_cache] #back_cache ∗
       consumer₁ γ stable front ∗
       back_lb γ back_cache ∗
       if b then

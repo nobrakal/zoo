@@ -365,8 +365,8 @@ Module base.
 
     #[local] Definition inv_inner t γ : iProp Σ :=
       ∃ state stable front back hist vs priv pasts prophss,
-      t.[front] ↦ #front ∗
-      t.[back] ↦ #back ∗
+      t ↦[front] #front ∗
+      t ↦[back] #back ∗
       owner₂ γ stable back ∗
       front_auth γ front ∗
       ⌜0 < front⌝ ∗
@@ -405,9 +405,9 @@ Module base.
       ".
     #[local] Definition inv' t γ : iProp Σ :=
       ⌜0 < γ.(ws_bdeque_1_name_capacity)⌝ ∗
-      t.[capacity] ↦□ #γ.(ws_bdeque_1_name_capacity) ∗
-      t.[data] ↦□ γ.(ws_bdeque_1_name_data) ∗
-      t.[proph] ↦□ #γ.(ws_bdeque_1_name_prophet) ∗
+      t ↦[capacity]□ #γ.(ws_bdeque_1_name_capacity) ∗
+      t ↦[data]□ γ.(ws_bdeque_1_name_data) ∗
+      t ↦[proph]□ #γ.(ws_bdeque_1_name_prophet) ∗
       inv γ.(ws_bdeque_1_name_inv) (inv_inner t γ).
     #[local] Instance : CustomIpat "inv'" :=
       " ( %Hcapacity
@@ -442,7 +442,7 @@ Module base.
       | OwnerPop.
     #[local] Definition owner_1 flag t γ stable back ws front_cache i us : iProp Σ :=
       owner₁ γ stable back ws ∗
-      t.[front_cache] ↦ #front_cache ∗
+      t ↦[front_cache] #front_cache ∗
       front_lb γ front_cache ∗
       ⌜(if flag is OwnerPop then S back else back) ≤ front_cache + γ.(ws_bdeque_1_name_capacity)⌝ ∗
       array_cslice γ.(ws_bdeque_1_name_data) γ.(ws_bdeque_1_name_capacity) i (DfracOwn (1/2)) us ∗
@@ -1655,7 +1655,7 @@ Module base.
       wp_apply (wp_wand (λ res,
         ∃ b front_cache,
         ⌜res = #b⌝ ∗
-        t.[front_cache] ↦ #front_cache ∗
+        t ↦[front_cache] #front_cache ∗
         front_lb γ front_cache ∗
         owner₁ γ Stable back ws ∗
         if b then

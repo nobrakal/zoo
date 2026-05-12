@@ -9,18 +9,26 @@ From zoo_std Require Import
 From zoo Require Import
   options.
 
+Notation capacity := (  in_type "zoo_saturn.mpmc_tqueue_2.t" 0
+) (only parsing).
 Notation "'capacity'" := (
   in_type "zoo_saturn.mpmc_tqueue_2.t" 0
 )(in custom zoo_field
 ).
+Notation data := (  in_type "zoo_saturn.mpmc_tqueue_2.t" 1
+) (only parsing).
 Notation "'data'" := (
   in_type "zoo_saturn.mpmc_tqueue_2.t" 1
 )(in custom zoo_field
 ).
+Notation front := (  in_type "zoo_saturn.mpmc_tqueue_2.t" 2
+) (only parsing).
 Notation "'front'" := (
   in_type "zoo_saturn.mpmc_tqueue_2.t" 2
 )(in custom zoo_field
 ).
+Notation back := (  in_type "zoo_saturn.mpmc_tqueue_2.t" 3
+) (only parsing).
 Notation "'back'" := (
   in_type "zoo_saturn.mpmc_tqueue_2.t" 3
 )(in custom zoo_field

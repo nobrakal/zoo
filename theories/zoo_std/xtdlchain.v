@@ -38,23 +38,23 @@ Section zoo_G.
   Lemma xtdlchain_singleton hdr src node dst :
     xtdlchain hdr src [node] dst ⊣⊢
       node ↦ₕ hdr ∗
-      node.[xtdlchain_prev] ↦ src ∗
-      node.[xtdlchain_next] ↦ dst.
+      node ↦[xtdlchain_prev] src ∗
+      node ↦[xtdlchain_next] dst.
   Proof.
     rewrite /xtdlchain xdlchain_singleton. iSteps.
   Qed.
   Lemma xtdlchain_singleton_1 hdr src node dst :
     xtdlchain hdr src [node] dst ⊢
       node ↦ₕ hdr ∗
-      node.[xtdlchain_prev] ↦ src ∗
-      node.[xtdlchain_next] ↦ dst.
+      node ↦[xtdlchain_prev] src ∗
+      node ↦[xtdlchain_next] dst.
   Proof.
     rewrite xtdlchain_singleton //.
   Qed.
   Lemma xtdlchain_singleton_2 hdr src node dst :
     node ↦ₕ hdr ∗
-    node.[xtdlchain_prev] ↦ src -∗
-    node.[xtdlchain_next] ↦ dst -∗
+    node ↦[xtdlchain_prev] src -∗
+    node ↦[xtdlchain_next] dst -∗
     xtdlchain hdr src [node] dst.
   Proof.
     rewrite xtdlchain_singleton. iSteps.
@@ -64,8 +64,8 @@ Section zoo_G.
     nodes = node :: nodes' →
     xtdlchain hdr src nodes dst ⊣⊢
       node ↦ₕ hdr ∗
-      node.[xtdlchain_prev] ↦ src ∗
-      node.[xtdlchain_next] ↦ from_option #@{location} dst (head nodes') ∗
+      node ↦[xtdlchain_prev] src ∗
+      node ↦[xtdlchain_next] from_option #@{location} dst (head nodes') ∗
       xtdlchain hdr #node nodes' dst.
   Proof.
     intros ->.
@@ -75,16 +75,16 @@ Section zoo_G.
     nodes = node :: nodes' →
     xtdlchain hdr src nodes dst ⊢
       node ↦ₕ hdr ∗
-      node.[xtdlchain_prev] ↦ src ∗
-      node.[xtdlchain_next] ↦ from_option #@{location} dst (head nodes') ∗
+      node ↦[xtdlchain_prev] src ∗
+      node ↦[xtdlchain_next] from_option #@{location} dst (head nodes') ∗
       xtdlchain hdr #node nodes' dst.
   Proof.
     intros. rewrite xtdlchain_cons //.
   Qed.
   Lemma xtdlchain_cons_2 hdr src node nodes dst :
     node ↦ₕ hdr ∗
-    node.[xtdlchain_prev] ↦ src -∗
-    node.[xtdlchain_next] ↦ from_option #@{location} dst (head nodes) -∗
+    node ↦[xtdlchain_prev] src -∗
+    node ↦[xtdlchain_next] from_option #@{location} dst (head nodes) -∗
     xtdlchain hdr #node nodes dst -∗
     xtdlchain hdr src (node :: nodes) dst.
   Proof.
@@ -121,8 +121,8 @@ Section zoo_G.
     xtdlchain hdr src nodes dst ⊣⊢
       xtdlchain hdr src nodes' #node ∗
       node ↦ₕ hdr ∗
-      node.[xtdlchain_prev] ↦ from_option #@{location} src (last nodes') ∗
-      node.[xtdlchain_next] ↦ dst.
+      node ↦[xtdlchain_prev] from_option #@{location} src (last nodes') ∗
+      node ↦[xtdlchain_next] dst.
   Proof.
     intros ->.
     rewrite /xtdlchain xdlchain_snoc // big_sepL_snoc. iSteps.
@@ -132,16 +132,16 @@ Section zoo_G.
     xtdlchain hdr src nodes dst ⊢
       xtdlchain hdr src nodes' #node ∗
       node ↦ₕ hdr ∗
-      node.[xtdlchain_prev] ↦ from_option #@{location} src (last nodes') ∗
-      node.[xtdlchain_next] ↦ dst.
+      node ↦[xtdlchain_prev] from_option #@{location} src (last nodes') ∗
+      node ↦[xtdlchain_next] dst.
   Proof.
     intros. rewrite xtdlchain_snoc //.
   Qed.
   Lemma xtdlchain_snoc_2 hdr src nodes node dst :
     xtdlchain hdr src nodes #node -∗
     node ↦ₕ hdr -∗
-    node.[xtdlchain_prev] ↦ from_option #@{location} src (last nodes) -∗
-    node.[xtdlchain_next] ↦ dst -∗
+    node ↦[xtdlchain_prev] from_option #@{location} src (last nodes) -∗
+    node ↦[xtdlchain_next] dst -∗
     xtdlchain hdr src (nodes ++ [node]) dst.
   Proof.
     rewrite (xtdlchain_snoc (nodes ++ [node])) //. iSteps.
@@ -154,8 +154,8 @@ Section zoo_G.
       ⌜nodes = nodes' ++ [node]⌝ ∗
       xtdlchain hdr src nodes' #node ∗
       node ↦ₕ hdr ∗
-      node.[xtdlchain_prev] ↦ from_option #@{location} src (last nodes') ∗
-      node.[xtdlchain_next] ↦ dst.
+      node ↦[xtdlchain_prev] from_option #@{location} src (last nodes') ∗
+      node ↦[xtdlchain_next] dst.
   Proof.
     intros Hnode.
     rewrite /xtdlchain xdlchain_last // .
@@ -168,8 +168,8 @@ Section zoo_G.
     xtdlchain hdr src nodes dst ⊣⊢
       xtdlchain hdr src (take i nodes) #node ∗
       node ↦ₕ hdr ∗
-      node.[xtdlchain_prev] ↦ from_option #@{location} src (last $ take i nodes) ∗
-      node.[xtdlchain_next] ↦ from_option #@{location} dst (head $ drop (S i) nodes) ∗
+      node ↦[xtdlchain_prev] from_option #@{location} src (last $ take i nodes) ∗
+      node ↦[xtdlchain_next] from_option #@{location} dst (head $ drop (S i) nodes) ∗
       xtdlchain hdr #node (drop (S i) nodes) dst.
   Proof.
     intros.
@@ -182,8 +182,8 @@ Section zoo_G.
     xtdlchain hdr src nodes dst ⊢
       xtdlchain hdr src (take i nodes) #node ∗
       node ↦ₕ hdr ∗
-      node.[xtdlchain_prev] ↦ from_option #@{location} src (last $ take i nodes) ∗
-      node.[xtdlchain_next] ↦ from_option #@{location} dst (head $ drop (S i) nodes) ∗
+      node ↦[xtdlchain_prev] from_option #@{location} src (last $ take i nodes) ∗
+      node ↦[xtdlchain_next] from_option #@{location} dst (head $ drop (S i) nodes) ∗
       xtdlchain hdr #node (drop (S i) nodes) dst.
   Proof.
     intros. rewrite xtdlchain_lookup //.
@@ -194,22 +194,22 @@ Section zoo_G.
     next = from_option #@{location} dst (head $ drop (S i) nodes) →
     xtdlchain hdr src (take i nodes) #node -∗
     node ↦ₕ hdr -∗
-    node.[xtdlchain_prev] ↦ prev -∗
-    node.[xtdlchain_next] ↦ next -∗
+    node ↦[xtdlchain_prev] prev -∗
+    node ↦[xtdlchain_next] next -∗
     xtdlchain hdr #node (drop (S i) nodes) dst -∗
     xtdlchain hdr src nodes dst.
   Proof.
-    intros. rewrite (@xtdlchain_lookup _ _ nodes) //. iSteps.
+    intros ? -> ->. rewrite (@xtdlchain_lookup _ _ nodes) //. iSteps.
   Qed.
 
   Lemma xtdlchain_lookup_acc {hdr src nodes} i node dst :
     nodes !! i = Some node →
     xtdlchain hdr src nodes dst ⊢
       node ↦ₕ hdr ∗
-      node.[xtdlchain_prev] ↦ from_option #@{location} src (last $ take i nodes) ∗
-      node.[xtdlchain_next] ↦ from_option #@{location} dst (head $ drop (S i) nodes) ∗
-      ( node.[xtdlchain_prev] ↦ from_option #@{location} src (last $ take i nodes) -∗
-        node.[xtdlchain_next] ↦ from_option #@{location} dst (head $ drop (S i) nodes) -∗
+      node ↦[xtdlchain_prev] from_option #@{location} src (last $ take i nodes) ∗
+      node ↦[xtdlchain_next] from_option #@{location} dst (head $ drop (S i) nodes) ∗
+      ( node ↦[xtdlchain_prev] from_option #@{location} src (last $ take i nodes) -∗
+        node ↦[xtdlchain_next] from_option #@{location} dst (head $ drop (S i) nodes) -∗
         xtdlchain hdr src nodes dst
       ).
   Proof.

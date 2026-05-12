@@ -74,7 +74,7 @@ Section inf_array_G.
 
   #[local] Definition inv_2 l γ us : iProp Σ :=
     ∃ data vs,
-    l.[data] ↦ data ∗
+    l ↦[data] data ∗
     array_model data (DfracOwn 1) us ∗
     model₂ γ vs ∗
     ⌜vs = λ i, if decide (i < length us) then us !!! i else γ.(metadata_default)⌝.
@@ -99,8 +99,8 @@ Section inf_array_G.
     ∃ l γ mtx,
     ⌜t = #l⌝ ∗
     l ↪ γ ∗
-    l.[default] ↦□ γ.(metadata_default) ∗
-    l.[mutex] ↦□ mtx ∗
+    l ↦[default]□ γ.(metadata_default) ∗
+    l ↦[mutex]□ mtx ∗
     mutex_inv mtx (inv_1 l γ).
   #[local] Instance : CustomIpat "inv" :=
     " ( %l
@@ -315,7 +315,7 @@ Section inf_array_G.
   #[local] Lemma inf_array٠reserve𑁒spec l γ us n :
     (0 ≤ n)%Z →
     {{{
-      l.[default] ↦□ γ.(metadata_default) ∗
+      l ↦[default]□ γ.(metadata_default) ∗
       inv_2 l γ us
     }}}
       inf_array٠reserve #l #n
@@ -656,7 +656,7 @@ Section inf_array_G.
 
     wp_bind (if: _ then _ else _)%E.
     wp_apply (wp_wand (λ res,
-      l.[data] ↦ data ∗
+      l ↦[data] data ∗
       array_model data (DfracOwn 1) (if b then <[₊i := v2]> us2 else us2)
     )%I with "[Hl_data Hdata]") as (res) "(Hl_data & Hdata)".
     { destruct b; last iSteps.
@@ -724,7 +724,7 @@ Section inf_array_G.
 
     wp_bind (if: _ then _ else _)%E.
     wp_apply (wp_wand (λ res,
-      l.[data] ↦ data ∗
+      l ↦[data] data ∗
       array_model data (DfracOwn 1) (if b then <[₊i := v2]> us2 else us2)
     )%I with "[Hl_data Hdata]") as (res) "(Hl_data & Hdata)".
     { destruct b; last iSteps.

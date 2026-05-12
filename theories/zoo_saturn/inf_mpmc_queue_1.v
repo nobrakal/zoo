@@ -194,8 +194,8 @@ Module base.
       end.
     #[local] Definition inv_inner t γ : iProp Σ :=
       ∃ front back hist slots,
-      t.[front] ↦ #front ∗
-      t.[back] ↦ #back ∗
+      t ↦[front] #front ∗
+      t ↦[back] #back ∗
       inf_array_model γ.(inf_mpmc_queue_1_name_data) (optional_to_val ∘ slots) ∗
       history_auth γ hist ∗
       ⌜length hist = back⌝ ∗
@@ -237,7 +237,7 @@ Module base.
         )
       ".
     Definition inv' t γ : iProp Σ :=
-      t.[data] ↦□ γ.(inf_mpmc_queue_1_name_data) ∗
+      t ↦[data]□ γ.(inf_mpmc_queue_1_name_data) ∗
       inf_array_inv γ.(inf_mpmc_queue_1_name_data) ∗
       inv γ.(inf_mpmc_queue_1_name_inv) (inv_inner t γ).
     #[local] Instance : CustomIpat "inv'" :=

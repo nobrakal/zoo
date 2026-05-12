@@ -13,18 +13,26 @@ From zoo Require Import
 From zoo Require Import
   options.
 
+Notation data := (  in_type "zoo_saturn.inf_mpmc_queue_2.t" 0
+) (only parsing).
 Notation "'data'" := (
   in_type "zoo_saturn.inf_mpmc_queue_2.t" 0
 )(in custom zoo_field
 ).
+Notation front := (  in_type "zoo_saturn.inf_mpmc_queue_2.t" 1
+) (only parsing).
 Notation "'front'" := (
   in_type "zoo_saturn.inf_mpmc_queue_2.t" 1
 )(in custom zoo_field
 ).
+Notation back := (  in_type "zoo_saturn.inf_mpmc_queue_2.t" 2
+) (only parsing).
 Notation "'back'" := (
   in_type "zoo_saturn.inf_mpmc_queue_2.t" 2
 )(in custom zoo_field
 ).
+Notation proph := (  in_type "zoo_saturn.inf_mpmc_queue_2.t" 3
+) (only parsing).
 Notation "'proph'" := (
   in_type "zoo_saturn.inf_mpmc_queue_2.t" 3
 )(in custom zoo_field

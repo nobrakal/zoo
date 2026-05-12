@@ -27,8 +27,8 @@ Section zoo_G.
   Definition xdeque_model t nodes : iProp Σ :=
     ∃ l,
     ⌜t = #l⌝ ∗
-    l.[xdeque_prev] ↦ from_option #@{location} t (last nodes) ∗
-    l.[xdeque_next] ↦ from_option #@{location} t (head nodes) ∗
+    l ↦[xdeque_prev] from_option #@{location} t (last nodes) ∗
+    l ↦[xdeque_next] from_option #@{location} t (head nodes) ∗
     xdlchain t nodes t.
 
   #[global] Instance xdeque_model_timeless t nodes :
@@ -91,14 +91,14 @@ Section zoo_G.
 
   #[local] Lemma xdeque٠link𑁒spec node1 v1 node2 v2 :
     {{{
-      node1.[xdeque_next] ↦ v1 ∗
-      node2.[xdeque_prev] ↦ v2
+      node1 ↦[xdeque_next] v1 ∗
+      node2 ↦[xdeque_prev] v2
     }}}
       xdeque٠link #node1 #node2
     {{{
       RET ();
-      node1.[xdeque_next] ↦ #node2 ∗
-      node2.[xdeque_prev] ↦ #node1
+      node1 ↦[xdeque_next] #node2 ∗
+      node2 ↦[xdeque_prev] #node1
     }}}.
   Proof.
     iSteps.
@@ -107,8 +107,8 @@ Section zoo_G.
   Lemma xdeque٠push_front𑁒spec t nodes node prev next :
     {{{
       xdeque_model t nodes ∗
-      node.[xdeque_prev] ↦ prev ∗
-      node.[xdeque_next] ↦ next
+      node ↦[xdeque_prev] prev ∗
+      node ↦[xdeque_next] next
     }}}
       xdeque٠push_front t #node
     {{{
@@ -135,8 +135,8 @@ Section zoo_G.
   Lemma xdeque٠push_back𑁒spec t nodes node prev next :
     {{{
       xdeque_model t nodes ∗
-      node.[xdeque_prev] ↦ prev ∗
-      node.[xdeque_next] ↦ next
+      node ↦[xdeque_prev] prev ∗
+      node ↦[xdeque_next] next
     }}}
       xdeque٠push_back t #node
     {{{
@@ -263,7 +263,7 @@ Section zoo_G.
     wp_bind (_ <-{xdeque_next} _)%E.
     wp_apply (wp_wand (λ res,
       ⌜res = ()%V⌝ ∗
-      l.[xdeque_next] ↦ from_option #@{location} #l (head nodes') ∗
+      l ↦[xdeque_next] from_option #@{location} #l (head nodes') ∗
       xdlchain #l nodes1 (from_option #@{location} #l $ head nodes2)
     )%I with "[Hnext Hnodes1]") as (res) "(-> & Hnext & Hnodes1)".
     { destruct nodes1 as [| node1 nodes1' _] eqn:Hnodes1 using rev_ind => /=; first iSteps.
@@ -277,7 +277,7 @@ Section zoo_G.
 
     wp_apply+ (wp_wand (λ res,
       ⌜res = ()%V⌝ ∗
-      l.[xdeque_prev] ↦ from_option #@{location} #l (last nodes') ∗
+      l ↦[xdeque_prev] from_option #@{location} #l (last nodes') ∗
       xdlchain (from_option #@{location} #l $ last nodes1) nodes2 #l
     )%I with "[Hprev Hnodes2]") as (res) "(-> & Hprev & Hnodes2)".
     { destruct nodes2 as [| node2 nodes2'] eqn:Hnodes2 => /=.

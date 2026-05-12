@@ -105,7 +105,7 @@ Section boxroot_G.
     roots_auth γ map ∗
     xdeque_model global roots ∗
     [∗ map] root ↦ ω ∈ map,
-      root.[xdeque_data] ↦root[gc] ω.
+      root ↦[xdeque_data]root[gc] ω.
 
   Definition boxroot_model t global ω : iProp Σ :=
     ∃ root l_global γ,

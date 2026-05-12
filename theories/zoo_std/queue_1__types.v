@@ -8,10 +8,14 @@ From zoo_std Require Import
 From zoo Require Import
   options.
 
+Notation front := (  in_type "zoo_std.queue_1.t" 0
+) (only parsing).
 Notation "'front'" := (
   in_type "zoo_std.queue_1.t" 0
 )(in custom zoo_field
 ).
+Notation back := (  in_type "zoo_std.queue_1.t" 1
+) (only parsing).
 Notation "'back'" := (
   in_type "zoo_std.queue_1.t" 1
 )(in custom zoo_field

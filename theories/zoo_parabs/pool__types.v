@@ -25,18 +25,26 @@ Notation "'context_id'" := (
 )(in custom zoo_proj
 ).
 
+Notation size := (  in_type "zoo_parabs.pool.t" 0
+) (only parsing).
 Notation "'size'" := (
   in_type "zoo_parabs.pool.t" 0
 )(in custom zoo_field
 ).
+Notation hub := (  in_type "zoo_parabs.pool.t" 1
+) (only parsing).
 Notation "'hub'" := (
   in_type "zoo_parabs.pool.t" 1
 )(in custom zoo_field
 ).
+Notation domains := (  in_type "zoo_parabs.pool.t" 2
+) (only parsing).
 Notation "'domains'" := (
   in_type "zoo_parabs.pool.t" 2
 )(in custom zoo_field
 ).
+Notation force_mutable := (  in_type "zoo_parabs.pool.t" 3
+) (only parsing).
 Notation "'force_mutable'" := (
   in_type "zoo_parabs.pool.t" 3
 )(in custom zoo_field

@@ -335,9 +335,9 @@ Module base.
     Definition pool_model t γ : iProp Σ :=
       ∃ empty doms,
       ⌜length doms = γ.(pool_name_size)⌝ ∗
-      t.[size] ↦□ #γ.(pool_name_size) ∗
-      t.[hub] ↦□ γ.(pool_name_hub) ∗
-      t.[domains] ↦□ γ.(pool_name_domains) ∗
+      t ↦[size]□ #γ.(pool_name_size) ∗
+      t ↦[hub]□ γ.(pool_name_hub) ∗
+      t ↦[domains]□ γ.(pool_name_domains) ∗
       inv_2 γ ∗
       array_model γ.(pool_name_domains) DfracDiscarded doms ∗
       ( [∗ list] i ↦ dom ∈ doms,
@@ -723,8 +723,8 @@ Module base.
 
     #[local] Lemma pool٠context_main𑁒spec t γ :
       {{{
-        t.[size] ↦□ #γ.(pool_name_size) ∗
-        t.[hub] ↦□ γ.(pool_name_hub)
+        t ↦[size]□ #γ.(pool_name_size) ∗
+        t ↦[hub]□ γ.(pool_name_hub)
       }}}
         pool٠context_main #t
       {{{
